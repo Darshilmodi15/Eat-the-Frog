@@ -1,0 +1,28 @@
+{
+  "name": "eat-the-frog-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Eat The Frog task management application",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "task-manager",
+    "express",
+    "mongodb"
+  ],
+  "author": "Darshil Modi",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.7.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.10"
+  }
+}
