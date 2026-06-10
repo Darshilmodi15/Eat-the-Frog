@@ -44,4 +44,4 @@ const start = async () => {
   });
 };
 
-start();
+start(); // Run database connection and start Express server wrapper
