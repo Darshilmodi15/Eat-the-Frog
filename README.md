@@ -1,4 +1,4 @@
-# 🐸 Eat The Frog — Task Manager
+ Eat The Frog — Task Manager
 
 > *"If it's your job to eat a frog, it's best to do it first thing in the morning."* — Mark Twain
 
