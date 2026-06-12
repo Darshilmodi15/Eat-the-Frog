@@ -7,20 +7,28 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  // Load user from localStorage on mount and validate token
   useEffect(() => {
-    const token = localStorage.getItem('etf_token');
-    const storedUser = localStorage.getItem('etf_user');
-    
-    if (token && storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        localStorage.removeItem('etf_token');
-        localStorage.removeItem('etf_user');
+    const checkAuth = async () => {
+      const token = localStorage.getItem('etf_token');
+      if (token) {
+        try {
+          const data = await authService.getMe();
+          setUser(data.user);
+          localStorage.setItem('etf_user', JSON.stringify(data.user));
+        } catch (error) {
+          console.error('[AUTH] Token verification failed on mount:', error);
+          localStorage.removeItem('etf_token');
+          localStorage.removeItem('etf_user');
+          setUser(null);
+        }
+      } else {
+        setUser(null);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   const login = useCallback(async (email, password) => {
