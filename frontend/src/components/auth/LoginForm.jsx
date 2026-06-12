@@ -64,7 +64,7 @@ export default function LoginForm() {
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={handleGoogleError}
-            width="100%"
+            width={400}
             text="continue_with"
             shape="rectangular"
             logo_alignment="left"
