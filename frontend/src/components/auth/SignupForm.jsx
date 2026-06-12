@@ -76,7 +76,7 @@ export default function SignupForm() {
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={handleGoogleError}
-            width="100%"
+            width={400}
             text="signup_with"
             shape="rectangular"
             logo_alignment="left"
