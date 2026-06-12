@@ -9,8 +9,10 @@ export default function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
-    navigate('/');
+    if (window.confirm('Are you sure you want to log out?')) {
+      logout();
+      navigate('/');
+    }
   };
 
   const handleFilterClick = (f) => {
