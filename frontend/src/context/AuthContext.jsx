@@ -31,6 +31,14 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
+  const googleLogin = useCallback(async (credential) => {
+    const data = await authService.googleLogin(credential);
+    localStorage.setItem('etf_token', data.token);
+    localStorage.setItem('etf_user', JSON.stringify(data.user));
+    setUser(data.user);
+    return data;
+  }, []);
+
   const signup = useCallback(async (name, email, password) => {
     const data = await authService.signup(name, email, password);
     localStorage.setItem('etf_token', data.token);
@@ -50,6 +58,7 @@ export function AuthProvider({ children }) {
     loading,
     isAuthenticated: !!user,
     login,
+    googleLogin,
     signup,
     logout
   };

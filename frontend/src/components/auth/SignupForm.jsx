@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext';
 import './AuthForm.css';
 
 export default function SignupForm() {
-  const { signup } = useAuth();
+  const { signup, googleLogin } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [error, setError] = useState('');
@@ -42,6 +43,20 @@ export default function SignupForm() {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('');
+    try {
+      await googleLogin(credentialResponse.credential);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google sign-in was cancelled or failed. Please try again.');
+  };
+
   return (
     <div className="auth-page">
       <div className="auth-card">
@@ -55,6 +70,26 @@ export default function SignupForm() {
         </div>
 
         {error && <div className="auth-error">{error}</div>}
+
+        {/* Google Sign-In Button */}
+        <div className="google-btn-wrapper">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            width="100%"
+            text="signup_with"
+            shape="rectangular"
+            logo_alignment="left"
+            theme="outline"
+          />
+        </div>
+
+        {/* OR Divider */}
+        <div className="auth-divider">
+          <span className="auth-divider-line" />
+          <span className="auth-divider-text">OR</span>
+          <span className="auth-divider-line" />
+        </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
@@ -119,7 +154,7 @@ export default function SignupForm() {
           </div>
 
           <button type="submit" className="btn btn-primary btn-lg auth-submit" disabled={loading}>
-            {loading ? 'Creating account...' : 'Create account'}
+            {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
