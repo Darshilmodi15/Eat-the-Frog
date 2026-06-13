@@ -4,7 +4,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import { useTasks } from '../../context/TaskContext';
 
 export default function TaskList({ onEdit, onShowAddForm }) {
-  const { tasks, loading, error, toggleComplete, deleteTask } = useTasks();
+  const { tasks, loading, error, toggleComplete, deleteTask, filter, searchQuery } = useTasks();
 
   if (loading) {
     return <LoadingSpinner text="Loading tasks..." />;
@@ -21,12 +21,39 @@ export default function TaskList({ onEdit, onShowAddForm }) {
   }
 
   if (tasks.length === 0) {
+    let emptyTitle = "No tasks yet";
+    let emptyMessage = "Add your first task and start eating the frog. Tackle the hardest one first!";
+    let emptyIcon = "🐸";
+    let showAction = true;
+
+    if (searchQuery) {
+      emptyTitle = "No tasks found";
+      emptyMessage = `No tasks match search "${searchQuery}"`;
+      emptyIcon = "🔍";
+      showAction = false;
+    } else if (filter === 'pending') {
+      emptyTitle = "No pending tasks.";
+      emptyMessage = "All tasks completed! Great job.";
+      emptyIcon = "⏳";
+      showAction = false;
+    } else if (filter === 'completed') {
+      emptyTitle = "No completed tasks.";
+      emptyMessage = "Complete some tasks to see them here!";
+      emptyIcon = "✅";
+      showAction = false;
+    } else if (filter === 'overdue') {
+      emptyTitle = "No overdue tasks.";
+      emptyMessage = "You have no overdue tasks.";
+      emptyIcon = "🎉";
+      showAction = false;
+    }
+
     return (
       <EmptyState
-        icon="🐸"
-        title="No tasks yet"
-        message="Add your first task and start eating the frog. Tackle the hardest one first!"
-        action={{ label: '+ Add your first task', onClick: onShowAddForm }}
+        icon={emptyIcon}
+        title={emptyTitle}
+        message={emptyMessage}
+        action={showAction ? { label: '+ Add your first task', onClick: onShowAddForm } : undefined}
       />
     );
   }

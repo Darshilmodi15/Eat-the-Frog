@@ -9,7 +9,10 @@ export function TaskProvider({ children }) {
   const [allTasks, setAllTasks] = useState([]);    // Unfiltered tasks for stats computation
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('all');       // 'all' | 'pending' | 'completed'
+  const [filter, setFilter] = useState(() => {
+    const saved = localStorage.getItem('etf_filter');
+    return saved || 'all';
+  }); // 'all' | 'pending' | 'completed' | 'overdue'
   const [sortBy, setSortBy] = useState('createdAt');  // 'createdAt' | 'dueDate' | 'priority'
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -20,6 +23,11 @@ export function TaskProvider({ children }) {
   filterRef.current = filter;
   sortByRef.current = sortBy;
   searchQueryRef.current = searchQuery;
+
+  const handleSetFilter = useCallback((newFilter) => {
+    setFilter(newFilter);
+    localStorage.setItem('etf_filter', newFilter);
+  }, []);
 
   // Fetch filtered tasks for display (respects current filter/sort/search)
   const fetchTasks = useCallback(async () => {
@@ -105,7 +113,7 @@ export function TaskProvider({ children }) {
     sortBy,
     searchQuery,
     stats,
-    setFilter,
+    setFilter: handleSetFilter,
     setSortBy,
     setSearchQuery,
     fetchTasks: fetchAll,  // DashboardPage calls this; it fetches both

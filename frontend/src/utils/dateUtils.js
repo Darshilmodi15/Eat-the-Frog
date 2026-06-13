@@ -22,10 +22,10 @@ export const formatDateForInput = (dateStr) => {
 };
 
 export const isOverdue = (dateStr) => {
+  if (!dateStr) return false;
   const dueDate = new Date(dateStr);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return dueDate < today;
+  const now = new Date();
+  return dueDate < now;
 };
 
 export const getDaysUntilDue = (dateStr) => {

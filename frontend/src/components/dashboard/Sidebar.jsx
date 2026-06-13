@@ -24,6 +24,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { key: 'all', label: 'All Tasks', icon: '📋', count: stats.total },
     { key: 'pending', label: 'Pending', icon: '⏳', count: stats.pending },
     { key: 'completed', label: 'Completed', icon: '✅', count: stats.completed },
+    { key: 'overdue', label: 'Overdue', icon: '🔴', count: stats.overdue, isDanger: true },
   ];
 
   return (
@@ -60,17 +61,11 @@ export default function Sidebar({ isOpen, onClose }) {
           >
             <span className="sidebar-nav-icon">{item.icon}</span>
             <span className="sidebar-nav-text">{item.label}</span>
-            <span className="sidebar-nav-count">{item.count}</span>
+            <span className={`sidebar-nav-count ${item.isDanger && filter !== item.key ? 'sidebar-nav-count-danger' : ''}`}>
+              {item.count}
+            </span>
           </button>
         ))}
-
-        {stats.overdue > 0 && (
-          <div className="sidebar-overdue">
-            <span className="sidebar-nav-icon">🔴</span>
-            <span className="sidebar-nav-text">Overdue</span>
-            <span className="sidebar-nav-count sidebar-nav-count-danger">{stats.overdue}</span>
-          </div>
-        )}
       </nav>
 
       <div className="sidebar-footer">

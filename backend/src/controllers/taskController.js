@@ -33,6 +33,10 @@ const getTasks = async (req, res, next) => {
     // Status filter
     if (status === 'pending') filter.completed = false;
     if (status === 'completed') filter.completed = true;
+    if (status === 'overdue') {
+      filter.completed = false;
+      filter.dueDate = { $lt: new Date() };
+    }
 
     // Search filter
     if (search) {
