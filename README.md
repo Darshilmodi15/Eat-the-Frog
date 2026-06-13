@@ -191,32 +191,138 @@ The goal is to feel human rather than corporate.
 ```bash
 Eat-The-Frog/
 │
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── contexts/
-│   │   ├── hooks/
-│   │   ├── services/
-│   │   ├── utils/
-│   │   └── assets/
-│   │
-│   └── public/
+├── README.md
 │
 ├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   ├── controllers/
-│   │   ├── middleware/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── jobs/
-│   │   └── utils/
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── uploads/
+│   │   └── avatars/
 │   │
-│   └── server.js
+│   └── src/
+│       ├── server.js
+│       │
+│       ├── config/
+│       │   └── db.js
+│       │
+│       ├── controllers/
+│       │   ├── authController.js
+│       │   ├── taskController.js
+│       │   └── notificationController.js
+│       │
+│       ├── middleware/
+│       │   ├── auth.js
+│       │   └── errorHandler.js
+│       │
+│       ├── models/
+│       │   ├── User.js
+│       │   ├── Task.js
+│       │   └── Notification.js
+│       │
+│       ├── routes/
+│       │   ├── authRoutes.js
+│       │   ├── taskRoutes.js
+│       │   └── notificationRoutes.js
+│       │
+│       ├── services/
+│       │   └── emailService.js
+│       │
+│       └── tests/
+│           ├── sync-audit.test.js
+│           ├── filtering-audit.test.js
+│           ├── security-audit.test.js
+│           ├── workspace-theme-audit.test.js
+│           ├── settings-profile-audit.test.js
+│           ├── subtask-hierarchy-audit.test.js
+│           └── analytics-notifications-audit.test.js
 │
-└── README.md
+├── frontend/
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── vite.config.js
+│   ├── index.html
+│   │
+│   ├── public/
+│   │   ├── favicon.svg
+│   │   ├── icons.svg
+│   │   ├── pwa-192x192.png
+│   │   └── pwa-512x512.png
+│   │
+│   └── src/
+│       ├── main.jsx
+│       ├── App.jsx
+│       ├── App.css
+│       ├── index.css
+│       │
+│       ├── assets/
+│       │   ├── hero.png
+│       │   └── vite.svg
+│       │
+│       ├── components/
+│       │
+│       │   ├── auth/
+│       │   │   ├── LoginForm.jsx
+│       │   │   ├── SignupForm.jsx
+│       │   │   ├── ProfileSetupForm.jsx
+│       │   │   └── Auth Styling
+│       │   │
+│       │   ├── dashboard/
+│       │   │   ├── DashboardLayout
+│       │   │   ├── Sidebar
+│       │   │   ├── TaskList
+│       │   │   ├── TaskCard
+│       │   │   ├── AddTaskForm
+│       │   │   ├── EditTaskModal
+│       │   │   ├── SettingsModal
+│       │   │   ├── NotificationCenter
+│       │   │   ├── AnalyticsDashboard
+│       │   │   ├── StatsBar
+│       │   │   ├── FilterBar
+│       │   │   ├── ConfirmDeleteModal
+│       │   │   └── LogoutModal
+│       │   │
+│       │   ├── landing/
+│       │   │   ├── Navbar
+│       │   │   ├── Hero
+│       │   │   ├── Features
+│       │   │   ├── HowItWorks
+│       │   │   └── Footer
+│       │   │
+│       │   └── common/
+│       │       ├── ProtectedRoute
+│       │       ├── GuestRoute
+│       │       ├── Toast
+│       │       ├── LoadingSpinner
+│       │       └── EmptyState
+│       │
+│       ├── context/
+│       │   ├── AuthContext.jsx
+│       │   ├── TaskContext.jsx
+│       │   └── ThemeContext.jsx
+│       │
+│       ├── services/
+│       │   ├── api.js
+│       │   ├── authService.js
+│       │   ├── taskService.js
+│       │   └── notificationService.js
+│       │
+│       ├── pages/
+│       │   ├── LandingPage.jsx
+│       │   ├── LoginPage.jsx
+│       │   ├── SignupPage.jsx
+│       │   ├── ProfileSetupPage.jsx
+│       │   ├── DashboardPage.jsx
+│       │   └── NotFoundPage.jsx
+│       │
+│       ├── hooks/
+│       │
+│       └── utils/
+│           └── dateUtils.js
+│
+└── Deployment
+    ├── Frontend → Vercel
+    ├── Backend → Render
+    └── Database → MongoDB Atlas
 ```
 
 ---
