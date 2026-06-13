@@ -104,10 +104,10 @@ export default function Hero() {
 
           <div className="hero-social-proof">
             <div className="hero-avatars">
-              <div className="hero-avatar" style={{background: '#E8CDB5'}}>D</div>
-              <div className="hero-avatar" style={{background: '#C5D5E8'}}>A</div>
-              <div className="hero-avatar" style={{background: '#D5E8C5'}}>M</div>
-              <div className="hero-avatar" style={{background: '#E8D5C5'}}>S</div>
+              <div className="hero-avatar avatar-1">D</div>
+              <div className="hero-avatar avatar-2">A</div>
+              <div className="hero-avatar avatar-3">M</div>
+              <div className="hero-avatar avatar-4">S</div>
             </div>
             <p className="hero-social-text">
               Join productive people who eat the frog daily

@@ -8,6 +8,7 @@ const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const { initEmailService } = require('./services/emailService');
 const Task = require('./models/Task');
 const path = require('path');
@@ -67,6 +68,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error handler (must be last)
 app.use(errorHandler);

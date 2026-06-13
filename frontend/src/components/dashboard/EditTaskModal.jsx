@@ -115,18 +115,30 @@ export default function EditTaskModal({ task, onClose, onSuccess }) {
 
           <div className="modal-row">
             <div className="form-group" style={{flex: 1}}>
-              <label className="form-label" htmlFor="edit-priority">Priority</label>
-              <select
-                id="edit-priority"
-                name="priority"
-                className="form-select"
-                value={form.priority}
-                onChange={handleChange}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
+              <label className="form-label">Priority</label>
+              <div className="priority-selector">
+                <button
+                  type="button"
+                  className={`priority-btn low ${form.priority === 'low' ? 'active' : ''}`}
+                  onClick={() => setForm(prev => ({ ...prev, priority: 'low' }))}
+                >
+                  Low
+                </button>
+                <button
+                  type="button"
+                  className={`priority-btn medium ${form.priority === 'medium' ? 'active' : ''}`}
+                  onClick={() => setForm(prev => ({ ...prev, priority: 'medium' }))}
+                >
+                  Med
+                </button>
+                <button
+                  type="button"
+                  className={`priority-btn high ${form.priority === 'high' ? 'active' : ''}`}
+                  onClick={() => setForm(prev => ({ ...prev, priority: 'high' }))}
+                >
+                  High
+                </button>
+              </div>
             </div>
 
             <div className="form-group" style={{flex: 1}}>

@@ -1,0 +1,21 @@
+.logout-modal-content {
+  max-width: 400px;
+}
+
+.logout-modal-body {
+  padding: var(--space-4) var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+}
+
+.logout-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-bg-alt);
+  border-top: 1px solid var(--color-border);
+  border-bottom-left-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
+  margin: 0 -32px -32px -32px;
+}

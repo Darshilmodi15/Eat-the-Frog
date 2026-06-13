@@ -2,6 +2,10 @@ const nodemailer = require('nodemailer');
 const cron = require('node-cron');
 const Task = require('../models/Task');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
+
+// NOTE: Email reminders are experimental and may not be delivered reliably
+// in all environments. In-app notifications are created as the primary channel.
 
 let transporter = null;
 
@@ -98,6 +102,16 @@ const sendDueTomorrowNotifications = async () => {
         </div>
       `;
 
+      // Create in-app notification (primary channel)
+      await Notification.create({
+        userId: user._id,
+        type: 'task_due_tomorrow',
+        title: 'Task Due Tomorrow',
+        message: `"${task.title}" is due tomorrow. Tackle it first thing!`,
+        taskId: task._id
+      });
+
+      // Send email (experimental secondary channel)
       await transporter.sendMail({
         from: `"Eat The Frog" <${process.env.EMAIL_USER}>`,
         to: user.email,
@@ -164,6 +178,16 @@ const sendOverdueNotifications = async () => {
         </div>
       `;
 
+      // Create in-app notification (primary channel)
+      await Notification.create({
+        userId: user._id,
+        type: 'task_overdue',
+        title: 'Task Overdue',
+        message: `"${task.title}" was due ${dueStr}. Please review or reschedule.`,
+        taskId: task._id
+      });
+
+      // Send email (experimental secondary channel)
       await transporter.sendMail({
         from: `"Eat The Frog" <${process.env.EMAIL_USER}>`,
         to: user.email,
@@ -256,6 +280,15 @@ const sendDailySummaries = async () => {
         </div>
       `;
 
+      // Create in-app notification (primary channel)
+      await Notification.create({
+        userId: user._id,
+        type: 'daily_summary',
+        title: 'Daily Summary',
+        message: `Today: ${dueTodayCount} due, ${pendingCount} pending, ${overdueCount} overdue. ${completedYesterdayCount} completed yesterday.`
+      });
+
+      // Send email (experimental secondary channel)
       await transporter.sendMail({
         from: `"Eat The Frog" <${process.env.EMAIL_USER}>`,
         to: user.email,
@@ -364,6 +397,15 @@ const sendWeeklyReviews = async () => {
         </div>
       `;
 
+      // Create in-app notification (primary channel)
+      await Notification.create({
+        userId: user._id,
+        type: 'weekly_review',
+        title: 'Weekly Review',
+        message: `This week: ${completedCount} completed, ${createdCount} created (${completionRate}% rate). Best day: ${completedCount > 0 ? bestDay : 'N/A'}.`
+      });
+
+      // Send email (experimental secondary channel)
       await transporter.sendMail({
         from: `"Eat The Frog" <${process.env.EMAIL_USER}>`,
         to: user.email,

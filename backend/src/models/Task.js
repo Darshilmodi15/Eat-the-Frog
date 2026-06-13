@@ -91,12 +91,11 @@ const taskSchema = new mongoose.Schema({
 });
 
 // Reset notification flags on dueDate change
-taskSchema.pre('save', function(next) {
+taskSchema.pre('save', function() {
   if (this.isModified('dueDate')) {
     this.notifiedDueTomorrow = false;
     this.notifiedOverdue = false;
   }
-  next();
 });
 
 // Virtual property for progress calculation

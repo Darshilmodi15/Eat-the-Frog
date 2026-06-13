@@ -7,6 +7,7 @@ import AddTaskForm from '../components/dashboard/AddTaskForm';
 import EditTaskModal from '../components/dashboard/EditTaskModal';
 import ConfirmDeleteModal from '../components/dashboard/ConfirmDeleteModal';
 import AnalyticsDashboard from '../components/dashboard/AnalyticsDashboard';
+import NotificationCenter from '../components/dashboard/NotificationCenter';
 import { ToastContainer } from '../components/common/Toast';
 import { useTasks } from '../context/TaskContext';
 import { useAuth } from '../context/AuthContext';
@@ -100,7 +101,8 @@ export default function DashboardPage() {
             Here's what's on your plate today. Eat the frog first!
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+          <NotificationCenter />
           {isSelectionMode ? (
             <button className="btn btn-secondary" onClick={() => {
               setIsSelectionMode(false);

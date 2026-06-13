@@ -9,7 +9,7 @@
 }
 
 .navbar-scrolled {
-  background: rgba(248, 246, 241, 0.92);
+  background: var(--color-navbar-scrolled);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: var(--shadow-sm);

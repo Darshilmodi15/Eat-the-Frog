@@ -93,6 +93,7 @@
   --sidebar-width: 260px;
   --header-height: 64px;
   --max-width: 1200px;
+  --color-navbar-scrolled: rgba(248, 246, 241, 0.92);
 }
 
 [data-theme="dark"] {
@@ -108,6 +109,7 @@
   --color-text-secondary: #A0A0A0;
   --color-text-tertiary: #555555;
   --color-text-inverse: #141414;
+  --color-navbar-scrolled: rgba(20, 20, 20, 0.92);
 
   --color-accent: #C49A3A;
   --color-accent-hover: #A37E2E;

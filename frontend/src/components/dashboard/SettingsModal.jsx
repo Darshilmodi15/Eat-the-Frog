@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import LogoutModal from './LogoutModal';
 import './SettingsModal.css';
 
 export default function SettingsModal({ onClose }) {
@@ -24,6 +25,7 @@ export default function SettingsModal({ onClose }) {
 
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -136,11 +138,14 @@ export default function SettingsModal({ onClose }) {
   };
 
   const handleLogoutClick = () => {
-    if (window.confirm('Are you sure you want to log out?')) {
-      logout();
-      onClose();
-      navigate('/');
-    }
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = () => {
+    logout();
+    setShowLogoutModal(false);
+    onClose();
+    navigate('/');
   };
 
   const handleDeleteAccountClick = async (e) => {
@@ -365,7 +370,7 @@ export default function SettingsModal({ onClose }) {
           <form onSubmit={handlePreferencesSave} className="settings-tab-form">
             <div className="settings-section">
               <h3 className="settings-section-title">Notification Preferences</h3>
-              <p className="settings-section-desc">Choose which reminders you would like to receive. (Reminders can be configured but are non-sending in V1).</p>
+              <p className="settings-section-desc">Choose which reminders you would like to receive. Email reminders are experimental and may not be delivered reliably in all environments. In-app notifications will always be delivered.</p>
               
               <div className="notification-preferences-list">
                 <label className="notification-preference-item">
@@ -585,6 +590,13 @@ export default function SettingsModal({ onClose }) {
           </div>
         </div>
       </div>
+      {showLogoutModal && (
+        <LogoutModal
+          isOpen={showLogoutModal}
+          onConfirm={handleConfirmLogout}
+          onClose={() => setShowLogoutModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -11,6 +11,27 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Eat The Frog" />
     <title>Eat The Frog — Task Manager</title>
+    <script>
+      (function() {
+        try {
+          var savedTheme = localStorage.getItem('etf_theme');
+          var user = null;
+          var savedUser = localStorage.getItem('etf_user');
+          if (savedUser) {
+            user = JSON.parse(savedUser);
+          }
+          var theme = (user && user.theme) || savedTheme || 'system';
+          var resolvedTheme = theme;
+          if (theme === 'system') {
+            resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', resolvedTheme);
+          console.log('[THEME] HTML pre-paint application:', theme, '-> resolved:', resolvedTheme);
+        } catch (e) {
+          console.error('[THEME] HTML pre-paint error:', e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

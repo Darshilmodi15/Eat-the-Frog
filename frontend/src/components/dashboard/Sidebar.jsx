@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTasks } from '../../context/TaskContext';
 import SettingsModal from './SettingsModal';
+import LogoutModal from './LogoutModal';
 import './Sidebar.css';
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -12,12 +13,16 @@ export default function Sidebar({ isOpen, onClose }) {
   
   const [showWorkspaceDropdown, setShowWorkspaceDropdown] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to log out?')) {
-      logout();
-      navigate('/');
-    }
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = () => {
+    logout();
+    setShowLogoutModal(false);
+    navigate('/');
   };
 
   const handleFilterClick = (f) => {
@@ -157,6 +162,14 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {showSettingsModal && (
         <SettingsModal onClose={() => setShowSettingsModal(false)} />
+      )}
+
+      {showLogoutModal && (
+        <LogoutModal 
+          isOpen={showLogoutModal} 
+          onConfirm={handleConfirmLogout} 
+          onClose={() => setShowLogoutModal(false)} 
+        />
       )}
     </aside>
   );
