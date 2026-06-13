@@ -1,0 +1,236 @@
+/* ===================================================================
+   Profile Setup — Post-Google-Signup Configuration
+   Follows the same auth-page pattern with the warm luxury aesthetic
+   =================================================================== */
+
+.profile-setup-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background: var(--color-bg);
+}
+
+.profile-setup-card {
+  width: 100%;
+  max-width: 480px;
+  animation: fadeInUp 0.4s ease both;
+}
+
+.profile-setup-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.profile-setup-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  margin-bottom: var(--space-6);
+  font-size: 28px;
+}
+
+.profile-setup-logo-text {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.profile-setup-welcome {
+  font-size: var(--text-sm);
+  color: var(--color-accent);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+
+.profile-setup-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.profile-setup-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* Workspace Type Selection Cards */
+.workspace-type-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.workspace-type-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.workspace-type-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.workspace-type-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: center;
+}
+
+.workspace-type-option:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.workspace-type-option.selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+  box-shadow: 0 0 0 3px var(--color-accent-light);
+}
+
+.workspace-type-option .workspace-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-base);
+}
+
+.workspace-type-option.selected .workspace-icon {
+  background: var(--color-accent);
+}
+
+.workspace-type-option.selected .workspace-icon svg {
+  color: white;
+}
+
+.workspace-type-name {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.workspace-type-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+}
+
+/* Check indicator on selected card */
+.workspace-type-option.selected::after {
+  content: '';
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 20px;
+  height: 20px;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M10 3L4.5 8.5 2 6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  animation: scaleIn 0.2s ease both;
+}
+
+.profile-setup-form {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.profile-setup-submit {
+  width: 100%;
+  margin-top: var(--space-1);
+}
+
+.profile-setup-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.profile-setup-skip {
+  text-align: center;
+  margin-top: var(--space-4);
+}
+
+.profile-setup-skip-btn {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+
+.profile-setup-skip-btn:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.profile-setup-error {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+/* Phone input with optional badge */
+.phone-group .form-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.optional-badge {
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+@media (max-width: 480px) {
+  .profile-setup-form {
+    padding: var(--space-6);
+  }
+  
+  .workspace-type-options {
+    grid-template-columns: 1fr;
+  }
+}

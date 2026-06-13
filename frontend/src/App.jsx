@@ -2,10 +2,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { TaskProvider } from './context/TaskContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import GuestRoute from './components/common/GuestRoute';
 
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import ProfileSetupPage from './pages/ProfileSetupPage';
 import DashboardPage from './pages/DashboardPage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -18,8 +20,21 @@ export default function App() {
         <TaskProvider>
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/login" element={
+              <GuestRoute>
+                <LoginPage />
+              </GuestRoute>
+            } />
+            <Route path="/signup" element={
+              <GuestRoute>
+                <SignupPage />
+              </GuestRoute>
+            } />
+            <Route path="/profile-setup" element={
+              <ProtectedRoute>
+                <ProfileSetupPage />
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardPage />

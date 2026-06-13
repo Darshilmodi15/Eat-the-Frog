@@ -34,8 +34,8 @@ export default function LoginForm() {
   const handleGoogleSuccess = async (credentialResponse) => {
     setError('');
     try {
-      await googleLogin(credentialResponse.credential);
-      navigate('/dashboard');
+      const data = await googleLogin(credentialResponse.credential);
+      navigate(data.isNewUser ? '/profile-setup' : '/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
     }

@@ -44,12 +44,19 @@ export function AuthProvider({ children }) {
     localStorage.setItem('etf_token', data.token);
     localStorage.setItem('etf_user', JSON.stringify(data.user));
     setUser(data.user);
-    return data;
+    return data; // includes isNewUser flag
   }, []);
 
   const signup = useCallback(async (name, email, password) => {
     const data = await authService.signup(name, email, password);
     localStorage.setItem('etf_token', data.token);
+    localStorage.setItem('etf_user', JSON.stringify(data.user));
+    setUser(data.user);
+    return data;
+  }, []);
+
+  const completeProfileSetup = useCallback(async (workspaceType, phoneNumber) => {
+    const data = await authService.profileSetup(workspaceType, phoneNumber);
     localStorage.setItem('etf_user', JSON.stringify(data.user));
     setUser(data.user);
     return data;
@@ -68,6 +75,7 @@ export function AuthProvider({ children }) {
     login,
     googleLogin,
     signup,
+    completeProfileSetup,
     logout
   };
 

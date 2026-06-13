@@ -156,6 +156,7 @@ const googleLogin = async (req, res, next) => {
 
     // Check if user already exists
     let user = await User.findOne({ $or: [{ googleId }, { email }] });
+    let isNewUser = false;
 
     if (user) {
       // STRICT ENFORCEMENT: If user exists with email/password, DENY Google login
@@ -168,12 +169,14 @@ const googleLogin = async (req, res, next) => {
 
       console.log('[AUTH] Existing Google user logged in:', { id: user._id, email });
     } else {
-      // New user — create with Google data
+      // New user — create with Google data (profileCompleted = false for profile setup)
+      isNewUser = true;
       user = await User.create({
         name,
         email,
         googleId,
-        authProvider: 'google'
+        authProvider: 'google',
+        profileCompleted: false
       });
       console.log('[AUTH] New Google user created in DB:', { id: user._id, email, collection: 'users' });
     }
@@ -182,12 +185,53 @@ const googleLogin = async (req, res, next) => {
     console.log('[AUTH] JWT generated for Google user:', user._id);
 
     res.json({
-      message: 'Logged in with Google successfully.',
+      message: isNewUser ? 'Account created with Google successfully.' : 'Logged in with Google successfully.',
       token,
-      user: user.toJSON()
+      user: user.toJSON(),
+      isNewUser
     });
   } catch (error) {
     console.error('[AUTH] Google login error:', error.message);
+    next(error);
+  }
+};
+
+// PUT /api/auth/profile-setup
+const profileSetup = async (req, res, next) => {
+  try {
+    const { workspaceType, phoneNumber } = req.body;
+
+    if (!workspaceType || !['personal', 'organization'].includes(workspaceType)) {
+      return res.status(400).json({ message: 'Workspace type is required. Must be "personal" or "organization".' });
+    }
+
+    // Optional phone number validation (basic)
+    if (phoneNumber && typeof phoneNumber !== 'string') {
+      return res.status(400).json({ message: 'Phone number must be a string.' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        workspaceType,
+        phoneNumber: phoneNumber || null,
+        profileCompleted: true
+      },
+      { returnDocument: 'after', runValidators: true }
+    ).select('-passwordHash');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    console.log('[AUTH] Profile setup completed:', { id: user._id, workspaceType });
+
+    res.json({
+      message: 'Profile setup completed.',
+      user: user.toJSON()
+    });
+  } catch (error) {
+    console.error('[AUTH] Profile setup error:', error.message);
     next(error);
   }
 };
@@ -197,6 +241,7 @@ module.exports = {
   login,
   getMe,
   googleLogin,
+  profileSetup,
   signupValidation,
   loginValidation
 };

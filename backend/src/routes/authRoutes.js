@@ -6,6 +6,7 @@ const {
   login,
   getMe,
   googleLogin,
+  profileSetup,
   signupValidation,
   loginValidation
 } = require('../controllers/authController');
@@ -14,5 +15,6 @@ router.post('/signup', signupValidation, signup);
 router.post('/login', loginValidation, login);
 router.post('/google', googleLogin);
 router.get('/me', auth, getMe);
+router.put('/profile-setup', auth, profileSetup);
 
 module.exports = router;

@@ -314,21 +314,20 @@ async function runTests() {
   console.log(`TEST SUMMARY: ${passedCount} PASSED, ${failedCount} FAILED`);
   console.log('======================================================\n');
 
-  if (failedCount > 0) {
-    process.exit(1);
-  } else {
-    process.exit(0);
-  }
+  return { passedCount, failedCount };
 }
 
 async function main() {
+  let exitCode = 1;
   try {
     await setup();
-    await runTests();
+    const { failedCount } = await runTests();
+    exitCode = failedCount > 0 ? 1 : 0;
   } catch (error) {
     console.error('Fatal test error:', error);
+  } finally {
     await teardown();
-    process.exit(1);
+    process.exit(exitCode);
   }
 }
 

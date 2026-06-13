@@ -30,6 +30,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['local', 'google'],
     default: 'local'
+  },
+  workspaceType: {
+    type: String,
+    enum: ['personal', 'organization'],
+    default: null
+  },
+  phoneNumber: {
+    type: String,
+    trim: true,
+    default: null
+  },
+  profileCompleted: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true

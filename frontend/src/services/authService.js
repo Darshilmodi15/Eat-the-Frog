@@ -19,5 +19,10 @@ export const authService = {
   getMe: async () => {
     const { data } = await api.get('/auth/me');
     return data;
+  },
+
+  profileSetup: async (workspaceType, phoneNumber) => {
+    const { data } = await api.put('/auth/profile-setup', { workspaceType, phoneNumber });
+    return data;
   }
 };
