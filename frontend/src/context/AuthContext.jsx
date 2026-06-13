@@ -76,6 +76,20 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
+  const uploadAvatar = useCallback(async (formData) => {
+    const data = await authService.uploadAvatar(formData);
+    localStorage.setItem('etf_user', JSON.stringify(data.user));
+    setUser(data.user);
+    return data;
+  }, []);
+
+  const deleteAccount = useCallback(async () => {
+    await authService.deleteAccount();
+    localStorage.removeItem('etf_token');
+    localStorage.removeItem('etf_user');
+    setUser(null);
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem('etf_token');
     localStorage.removeItem('etf_user');
@@ -91,6 +105,8 @@ export function AuthProvider({ children }) {
     signup,
     completeProfileSetup,
     updatePreferences,
+    uploadAvatar,
+    deleteAccount,
     logout
   };
 

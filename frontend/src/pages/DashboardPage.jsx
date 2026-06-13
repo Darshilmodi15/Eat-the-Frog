@@ -6,6 +6,7 @@ import TaskList from '../components/dashboard/TaskList';
 import AddTaskForm from '../components/dashboard/AddTaskForm';
 import EditTaskModal from '../components/dashboard/EditTaskModal';
 import ConfirmDeleteModal from '../components/dashboard/ConfirmDeleteModal';
+import AnalyticsDashboard from '../components/dashboard/AnalyticsDashboard';
 import { ToastContainer } from '../components/common/Toast';
 import { useTasks } from '../context/TaskContext';
 import { useAuth } from '../context/AuthContext';
@@ -127,16 +128,21 @@ export default function DashboardPage() {
         />
       )}
 
-      <FilterBar />
-
-      <TaskList
-        onEdit={(task) => setEditingTask(task)}
-        onDelete={(task) => setTaskToDelete(task)}
-        onShowAddForm={() => setShowAddForm(true)}
-        selectedTaskIds={selectedTaskIds}
-        onSelectTask={handleSelectTask}
-        isSelectionMode={isSelectionMode}
-      />
+      {filter === 'analytics' ? (
+        <AnalyticsDashboard />
+      ) : (
+        <>
+          <FilterBar />
+          <TaskList
+            onEdit={(task) => setEditingTask(task)}
+            onDelete={(task) => setTaskToDelete(task)}
+            onShowAddForm={() => setShowAddForm(true)}
+            selectedTaskIds={selectedTaskIds}
+            onSelectTask={handleSelectTask}
+            isSelectionMode={isSelectionMode}
+          />
+        </>
+      )}
 
       {editingTask && (
         <EditTaskModal

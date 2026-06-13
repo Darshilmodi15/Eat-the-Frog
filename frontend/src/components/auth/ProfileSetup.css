@@ -1,8 +1,3 @@
-/* ===================================================================
-   Profile Setup — Post-Google-Signup Configuration
-   Follows the same auth-page pattern with the warm luxury aesthetic
-   =================================================================== */
-
 .profile-setup-page {
   min-height: 100vh;
   display: flex;
@@ -229,7 +224,7 @@
   .profile-setup-form {
     padding: var(--space-6);
   }
-  
+
   .workspace-type-options {
     grid-template-columns: 1fr;
   }

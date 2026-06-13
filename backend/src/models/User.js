@@ -55,6 +55,37 @@ const userSchema = new mongoose.Schema({
     enum: ['personal', 'organization'],
     default: 'personal'
   },
+  defaultWorkspace: {
+    type: String,
+    enum: ['personal', 'organization', 'last_active'],
+    default: 'last_active'
+  },
+  notificationPreferences: {
+    emailReminders: {
+      type: Boolean,
+      default: false
+    },
+    overdueAlerts: {
+      type: Boolean,
+      default: false
+    },
+    dailySummary: {
+      type: Boolean,
+      default: false
+    },
+    weeklyReview: {
+      type: Boolean,
+      default: false
+    }
+  },
+  lastDailySummarySent: {
+    type: Date,
+    default: null
+  },
+  lastWeeklyReviewSent: {
+    type: Date,
+    default: null
+  },
   avatar: {
     type: String,
     default: null

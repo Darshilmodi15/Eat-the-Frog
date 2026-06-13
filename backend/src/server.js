@@ -10,6 +10,14 @@ const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const { initEmailService } = require('./services/emailService');
 const Task = require('./models/Task');
+const path = require('path');
+const fs = require('fs');
+
+// Ensure uploads folder exists in development/production
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -42,6 +50,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Request logger (development only)
 if (process.env.NODE_ENV === 'development') {

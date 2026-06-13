@@ -8,6 +8,7 @@ const {
   updateTask,
   deleteTask,
   reorderTasks,
+  getAnalytics,
   taskValidation,
   taskUpdateValidation
 } = require('../controllers/taskController');
@@ -16,6 +17,7 @@ const {
 router.use(auth);
 
 router.get('/', getTasks);
+router.get('/analytics', getAnalytics);
 router.post('/', taskValidation, createTask);
 router.patch('/reorder', reorderTasks);
 router.get('/:id', getTask);

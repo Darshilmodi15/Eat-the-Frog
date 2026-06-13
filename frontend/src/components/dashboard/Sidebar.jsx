@@ -30,6 +30,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { key: 'pending', label: 'Pending', icon: '⏳', count: stats.pending },
     { key: 'completed', label: 'Completed', icon: '✅', count: stats.completed },
     { key: 'overdue', label: 'Overdue', icon: '🔴', count: stats.overdue, isDanger: true },
+    { key: 'analytics', label: 'Analytics', icon: '📈' }
   ];
 
   return (
@@ -99,7 +100,11 @@ export default function Sidebar({ isOpen, onClose }) {
 
       <div className="sidebar-user">
         <div className="sidebar-avatar">
-          {user?.avatar || user?.name?.[0]?.toUpperCase() || 'U'}
+          {user?.avatar && (user.avatar.startsWith('/') || user.avatar.startsWith('http') || user.avatar.startsWith('data:')) ? (
+            <img src={user.avatar} alt="Avatar" className="sidebar-avatar-img" />
+          ) : (
+            user?.avatar || user?.name?.[0]?.toUpperCase() || 'U'
+          )}
         </div>
         <div className="sidebar-user-info">
           <span className="sidebar-user-name">{user?.name || 'User'}</span>
@@ -117,9 +122,11 @@ export default function Sidebar({ isOpen, onClose }) {
           >
             <span className="sidebar-nav-icon">{item.icon}</span>
             <span className="sidebar-nav-text">{item.label}</span>
-            <span className={`sidebar-nav-count ${item.isDanger && filter !== item.key ? 'sidebar-nav-count-danger' : ''}`}>
-              {item.count}
-            </span>
+            {item.count !== undefined && (
+              <span className={`sidebar-nav-count ${item.isDanger && filter !== item.key ? 'sidebar-nav-count-danger' : ''}`}>
+                {item.count}
+              </span>
+            )}
           </button>
         ))}
       </nav>

@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken');
 const { validationResult, body } = require('express-validator');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
+const fs = require('fs').promises;
+const path = require('path');
 
 // Lazy-initialized to ensure env vars are loaded by the time it's used
 let googleClient = null;
@@ -240,7 +242,7 @@ const profileSetup = async (req, res, next) => {
 // PUT /api/auth/preferences
 const updatePreferences = async (req, res, next) => {
   try {
-    const { theme, lastWorkspace, name, phoneNumber, avatar } = req.body;
+    const { theme, lastWorkspace, name, phoneNumber, avatar, defaultWorkspace, notificationPreferences } = req.body;
     const updates = {};
 
     if (theme !== undefined) {
@@ -272,8 +274,49 @@ const updatePreferences = async (req, res, next) => {
       updates.phoneNumber = phoneNumber || null;
     }
 
+    if (defaultWorkspace !== undefined) {
+      if (!['personal', 'organization', 'last_active'].includes(defaultWorkspace)) {
+        return res.status(400).json({ message: 'Invalid default workspace value.' });
+      }
+      updates.defaultWorkspace = defaultWorkspace;
+    }
+
+    if (notificationPreferences !== undefined) {
+      const notifUpdates = {};
+      const { emailReminders, overdueAlerts, dailySummary, weeklyReview } = notificationPreferences;
+      if (emailReminders !== undefined) notifUpdates.emailReminders = !!emailReminders;
+      if (overdueAlerts !== undefined) notifUpdates.overdueAlerts = !!overdueAlerts;
+      if (dailySummary !== undefined) notifUpdates.dailySummary = !!dailySummary;
+      if (weeklyReview !== undefined) notifUpdates.weeklyReview = !!weeklyReview;
+      updates.notificationPreferences = notifUpdates;
+    }
+
     if (avatar !== undefined) {
-      updates.avatar = avatar || null;
+      if (avatar === null || avatar === '') {
+        // Delete old custom file if it exists
+        if (req.user.avatar && req.user.avatar.startsWith('/uploads/')) {
+          const oldFilePath = path.join(__dirname, '../..', req.user.avatar);
+          try {
+            await fs.unlink(oldFilePath);
+            console.log('[AUTH] Avatar file deleted on removal:', oldFilePath);
+          } catch (unlinkErr) {
+            console.error('[AUTH] Failed to delete avatar file on removal:', unlinkErr.message);
+          }
+        }
+        updates.avatar = null;
+      } else {
+        // If updating to a new emoji, delete the old file upload if there was one
+        if (avatar !== req.user.avatar && req.user.avatar && req.user.avatar.startsWith('/uploads/')) {
+          const oldFilePath = path.join(__dirname, '../..', req.user.avatar);
+          try {
+            await fs.unlink(oldFilePath);
+            console.log('[AUTH] Avatar file deleted on switching to emoji:', oldFilePath);
+          } catch (unlinkErr) {
+            console.error('[AUTH] Failed to delete old avatar file:', unlinkErr.message);
+          }
+        }
+        updates.avatar = avatar;
+      }
     }
 
     if (Object.keys(updates).length === 0) {
@@ -302,6 +345,80 @@ const updatePreferences = async (req, res, next) => {
   }
 };
 
+// POST /api/auth/avatar
+const uploadAvatar = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Please upload an image file.' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Delete old avatar if it was a file upload on our server
+    if (user.avatar && user.avatar.startsWith('/uploads/')) {
+      const oldFilePath = path.join(__dirname, '../..', user.avatar);
+      try {
+        await fs.unlink(oldFilePath);
+        console.log('[AUTH] Old avatar deleted:', oldFilePath);
+      } catch (unlinkErr) {
+        console.error('[AUTH] Failed to delete old avatar:', unlinkErr.message);
+      }
+    }
+
+    const fileUrl = `/uploads/${req.file.filename}`;
+    user.avatar = fileUrl;
+    await user.save();
+
+    console.log('[AUTH] Avatar uploaded successfully for user:', user._id, 'Path:', fileUrl);
+
+    res.json({
+      message: 'Avatar uploaded successfully.',
+      user: user.toJSON()
+    });
+  } catch (error) {
+    console.error('[AUTH] Avatar upload error:', error.message);
+    next(error);
+  }
+};
+
+// DELETE /api/auth/account
+const Task = require('../models/Task');
+const deleteAccount = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Delete profile picture if it was a file upload on our server
+    if (user.avatar && user.avatar.startsWith('/uploads/')) {
+      const oldFilePath = path.join(__dirname, '../..', user.avatar);
+      try {
+        await fs.unlink(oldFilePath);
+        console.log('[AUTH] Deleted user avatar file:', oldFilePath);
+      } catch (unlinkErr) {
+        console.error('[AUTH] Failed to delete user avatar file on account deletion:', unlinkErr.message);
+      }
+    }
+
+    // Delete all tasks and subtasks for this user
+    const taskDeleteResult = await Task.deleteMany({ userId: req.user._id });
+    console.log(`[AUTH] Deleted ${taskDeleteResult.deletedCount} tasks/subtasks for user ${req.user._id}`);
+
+    // Delete user document
+    await User.findByIdAndDelete(req.user._id);
+    console.log('[AUTH] User account deleted successfully:', req.user._id);
+
+    res.json({ message: 'Account deleted successfully.' });
+  } catch (error) {
+    console.error('[AUTH] Account deletion error:', error.message);
+    next(error);
+  }
+};
+
 module.exports = {
   signup,
   login,
@@ -309,6 +426,8 @@ module.exports = {
   googleLogin,
   profileSetup,
   updatePreferences,
+  uploadAvatar,
+  deleteAccount,
   signupValidation,
   loginValidation
 };

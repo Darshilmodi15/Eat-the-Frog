@@ -25,10 +25,24 @@ export function TaskProvider({ children }) {
   const [sortBy, setSortBy] = useState('createdAt');  // 'createdAt' | 'dueDate' | 'priority'
   const [searchQuery, setSearchQuery] = useState('');
 
+  const lastUserIdRef = useRef(null);
+
   // Keep workspace state in sync if user changes (e.g. login or updates)
   useEffect(() => {
-    if (user?.lastWorkspace) {
-      setWorkspace(user.lastWorkspace);
+    if (user) {
+      if (lastUserIdRef.current !== user._id) {
+        lastUserIdRef.current = user._id;
+        const defaultWS = user.defaultWorkspace || 'last_active';
+        if (defaultWS === 'personal' || defaultWS === 'organization') {
+          setWorkspace(defaultWS);
+          localStorage.setItem('etf_workspace', defaultWS);
+        } else if (user.lastWorkspace) {
+          setWorkspace(user.lastWorkspace);
+          localStorage.setItem('etf_workspace', user.lastWorkspace);
+        }
+      }
+    } else {
+      lastUserIdRef.current = null;
     }
   }, [user]);
 

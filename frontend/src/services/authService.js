@@ -29,5 +29,19 @@ export const authService = {
   updatePreferences: async (preferences) => {
     const { data } = await api.put('/auth/preferences', preferences);
     return data;
+  },
+
+  uploadAvatar: async (formData) => {
+    const { data } = await api.post('/auth/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return data;
+  },
+
+  deleteAccount: async () => {
+    const { data } = await api.delete('/auth/account');
+    return data;
   }
 };

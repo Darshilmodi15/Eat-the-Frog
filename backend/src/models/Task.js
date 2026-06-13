@@ -66,6 +66,18 @@ const taskSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  completedAt: {
+    type: Date,
+    default: null
+  },
+  notifiedDueTomorrow: {
+    type: Boolean,
+    default: false
+  },
+  notifiedOverdue: {
+    type: Boolean,
+    default: false
+  },
   workspace: {
     type: String,
     enum: ['personal', 'organization'],
@@ -76,6 +88,15 @@ const taskSchema = new mongoose.Schema({
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
+});
+
+// Reset notification flags on dueDate change
+taskSchema.pre('save', function(next) {
+  if (this.isModified('dueDate')) {
+    this.notifiedDueTomorrow = false;
+    this.notifiedOverdue = false;
+  }
+  next();
 });
 
 // Virtual property for progress calculation
