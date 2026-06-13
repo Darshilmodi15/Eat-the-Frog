@@ -3,7 +3,7 @@ import EmptyState from '../common/EmptyState';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { useTasks } from '../../context/TaskContext';
 
-export default function TaskList({ onEdit, onDelete, onShowAddForm, selectedTaskIds, onSelectTask }) {
+export default function TaskList({ onEdit, onDelete, onShowAddForm, selectedTaskIds, onSelectTask, isSelectionMode }) {
   const { tasks, loading, error, toggleComplete, filter, searchQuery } = useTasks();
 
   if (loading) {
@@ -69,6 +69,7 @@ export default function TaskList({ onEdit, onDelete, onShowAddForm, selectedTask
           onDelete={onDelete}
           isSelected={selectedTaskIds?.includes(task._id)}
           onSelect={() => onSelectTask(task._id)}
+          isSelectionMode={isSelectionMode}
         />
       ))}
     </div>

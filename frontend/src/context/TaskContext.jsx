@@ -148,14 +148,14 @@ export function TaskProvider({ children }) {
     total: personalTasks.length,
     pending: personalTasks.filter(t => !t.completed).length,
     completed: personalTasks.filter(t => t.completed).length,
-    overdue: personalTasks.filter(t => !t.completed && isOverdue(t.dueDate)).length
+    overdue: personalTasks.filter(t => !t.completed && (isOverdue(t.dueDate) || t.subtasks?.some(s => !s.completed && isOverdue(s.dueDate)))).length
   };
 
   const organizationStats = {
     total: organizationTasks.length,
     pending: organizationTasks.filter(t => !t.completed).length,
     completed: organizationTasks.filter(t => t.completed).length,
-    overdue: organizationTasks.filter(t => !t.completed && isOverdue(t.dueDate)).length
+    overdue: organizationTasks.filter(t => !t.completed && (isOverdue(t.dueDate) || t.subtasks?.some(s => !s.completed && isOverdue(s.dueDate)))).length
   };
 
   // Expose the stats block belonging to the active workspace

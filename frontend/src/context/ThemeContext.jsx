@@ -1,11 +1,10 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
-import api from '../services/api';
 
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, updatePreferences } = useAuth() || {};
   
   // Initialize theme from user preference, fallback to localStorage, then default to 'system'
   const [theme, setTheme] = useState(() => {
@@ -14,10 +13,14 @@ export function ThemeProvider({ children }) {
     return saved || 'system';
   });
 
-  // Keep theme in sync if user object changes (e.g. login or updates from other devices)
+  // Keep theme in sync if user object changes (e.g. login, logout, or updates)
   useEffect(() => {
     if (user?.theme) {
       setTheme(user.theme);
+    } else if (user === null) {
+      // Revert theme to local preferences on logout
+      const saved = localStorage.getItem('etf_theme');
+      setTheme(saved || 'system');
     }
   }, [user]);
 
@@ -68,16 +71,14 @@ export function ThemeProvider({ children }) {
     setTheme(newTheme);
     localStorage.setItem('etf_theme', newTheme);
     
-    if (isAuthenticated) {
+    if (isAuthenticated && updatePreferences) {
       try {
-        const { data } = await api.put('/auth/preferences', { theme: newTheme });
-        // Update user cache in localStorage
-        localStorage.setItem('etf_user', JSON.stringify(data.user));
+        await updatePreferences({ theme: newTheme });
       } catch (error) {
         console.error('[THEME] Failed to save theme preference in database:', error);
       }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, updatePreferences]);
 
   const value = {
     theme,

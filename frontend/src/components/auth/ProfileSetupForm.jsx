@@ -110,7 +110,7 @@ export default function ProfileSetupForm() {
               id="profile-phone"
               type="tel"
               className="form-input"
-              placeholder="+1 (555) 000-0000"
+              placeholder="+91 98989 89898"
               value={phoneNumber}
               onChange={(e) => { setPhoneNumber(e.target.value); setError(''); }}
               autoComplete="tel"
@@ -125,7 +125,7 @@ export default function ProfileSetupForm() {
           >
             {loading ? 'Setting up...' : 'Continue to Dashboard'}
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         </form>

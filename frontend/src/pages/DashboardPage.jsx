@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [toasts, setToasts] = useState([]);
 
   // Task Selection & Delete Confirmation states
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedTaskIds, setSelectedTaskIds] = useState([]);
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
@@ -25,6 +26,7 @@ export default function DashboardPage() {
   // Clear selections when filter changes
   useEffect(() => {
     setSelectedTaskIds([]);
+    setIsSelectionMode(false);
   }, [filter]);
 
   // Re-fetch on mount and whenever filter/sort/search/workspace changes
@@ -66,6 +68,7 @@ export default function DashboardPage() {
       await deleteMultipleTasks(selectedTaskIds);
       addToast(`${selectedTaskIds.length} tasks deleted successfully.`);
       setSelectedTaskIds([]);
+      setIsSelectionMode(false);
     } catch (err) {
       addToast('Failed to delete selected tasks.', 'error');
     } finally {
@@ -96,9 +99,23 @@ export default function DashboardPage() {
             Here's what's on your plate today. Eat the frog first!
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAddForm(prev => !prev)}>
-          {showAddForm ? 'Cancel' : '+ Add Task'}
-        </button>
+        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+          {isSelectionMode ? (
+            <button className="btn btn-secondary" onClick={() => {
+              setIsSelectionMode(false);
+              setSelectedTaskIds([]);
+            }} id="select-tasks-btn">
+              Cancel Selection
+            </button>
+          ) : (
+            <button className="btn btn-secondary" onClick={() => setIsSelectionMode(true)} id="select-tasks-btn">
+              Select Tasks
+            </button>
+          )}
+          <button className="btn btn-primary" onClick={() => setShowAddForm(prev => !prev)}>
+            {showAddForm ? 'Cancel' : '+ Add Task'}
+          </button>
+        </div>
       </div>
 
       <StatsBar />
@@ -118,6 +135,7 @@ export default function DashboardPage() {
         onShowAddForm={() => setShowAddForm(true)}
         selectedTaskIds={selectedTaskIds}
         onSelectTask={handleSelectTask}
+        isSelectionMode={isSelectionMode}
       />
 
       {editingTask && (
@@ -131,8 +149,11 @@ export default function DashboardPage() {
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
         isOpen={!!taskToDelete}
-        title="Delete Task"
-        message="Are you sure you want to delete this task? This action cannot be undone."
+        title={taskToDelete?.subtasks?.length > 0 ? "Delete Parent Task" : "Delete Task"}
+        message={taskToDelete?.subtasks?.length > 0 
+          ? "Delete Parent Task and all Subtasks? This action cannot be undone." 
+          : "Are you sure you want to delete this task? This action cannot be undone."
+        }
         taskTitle={taskToDelete?.title}
         onConfirm={handleConfirmDelete}
         onClose={() => setTaskToDelete(null)}

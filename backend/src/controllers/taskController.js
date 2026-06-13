@@ -61,7 +61,10 @@ const getTasks = async (req, res, next) => {
     if (status === 'completed') filter.completed = true;
     if (status === 'overdue') {
       filter.completed = false;
-      filter.dueDate = { $lt: new Date() };
+      filter.$or = [
+        { dueDate: { $lt: new Date() } },
+        { 'subtasks': { $elemMatch: { completed: false, dueDate: { $lt: new Date() } } } }
+      ];
     }
 
     // Search filter
@@ -153,12 +156,32 @@ const updateTask = async (req, res, next) => {
       return res.status(400).json({ message: errors.array()[0].msg });
     }
 
+    const existingTask = await Task.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!existingTask) {
+      return res.status(404).json({ message: 'Task not found.' });
+    }
+
     // Whitelist allowed fields — prevents userId, _id, order, etc. injection
     const allowedFields = ['title', 'description', 'priority', 'dueDate', 'completed', 'subtasks'];
     const updates = {};
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) {
         updates[field] = req.body[field];
+      }
+    }
+
+    // Auto-management of subtasks completion status
+    if (updates.subtasks !== undefined) {
+      const subtasks = updates.subtasks || [];
+      if (subtasks.length > 0) {
+        updates.completed = subtasks.every(s => s.completed);
+      }
+    } else if (updates.completed !== undefined) {
+      if (existingTask.subtasks && existingTask.subtasks.length > 0) {
+        updates.subtasks = existingTask.subtasks.map(s => {
+          const subDoc = s.toObject ? s.toObject() : s;
+          return { ...subDoc, completed: updates.completed };
+        });
       }
     }
 
@@ -171,10 +194,6 @@ const updateTask = async (req, res, next) => {
       { $set: updates },
       { returnDocument: 'after', runValidators: true }
     );
-
-    if (!task) {
-      return res.status(404).json({ message: 'Task not found.' });
-    }
 
     res.json({ message: 'Task updated.', task });
   } catch (error) {

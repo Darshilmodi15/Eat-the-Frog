@@ -1,25 +1,101 @@
+import { useState } from 'react';
 import { isOverdue, getDueDateLabel } from '../../utils/dateUtils';
+import { useTasks } from '../../context/TaskContext';
 import './TaskCard.css';
 
-export default function TaskCard({ task, onToggle, onEdit, onDelete, isSelected, onSelect }) {
+export default function TaskCard({ task, onToggle, onEdit, onDelete, isSelected, onSelect, isSelectionMode }) {
+  const { updateTask } = useTasks();
+  
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+  const [newSubtaskDueDate, setNewSubtaskDueDate] = useState('');
+
+  const getTodayDateString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const overdue = !task.completed && isOverdue(task.dueDate);
   const dueDateLabel = getDueDateLabel(task.dueDate);
+
+  const handleToggleParent = async () => {
+    if (task.subtasks && task.subtasks.length > 0) {
+      const allCompleted = task.subtasks.every(s => s.completed);
+      // Toggle all subtasks to the opposite of allCompleted
+      const updatedSubtasks = task.subtasks.map(s => {
+        const subDoc = s.toObject ? s.toObject() : s;
+        return { ...subDoc, completed: !allCompleted };
+      });
+      await updateTask(task._id, { subtasks: updatedSubtasks });
+    } else {
+      await onToggle(task._id, task.completed);
+    }
+  };
+
+  const handleToggleSubtask = async (subtaskIndex) => {
+    const updatedSubtasks = task.subtasks.map((s, idx) => {
+      const subDoc = s.toObject ? s.toObject() : s;
+      if (idx === subtaskIndex) {
+        return { ...subDoc, completed: !subDoc.completed };
+      }
+      return subDoc;
+    });
+    await updateTask(task._id, { subtasks: updatedSubtasks });
+  };
+
+  const handleDeleteSubtask = async (subtaskIndex) => {
+    const updatedSubtasks = task.subtasks.filter((_, idx) => idx !== subtaskIndex).map(s => {
+      return s.toObject ? s.toObject() : s;
+    });
+    await updateTask(task._id, { subtasks: updatedSubtasks });
+  };
+
+  const handleAddSubtask = async (e) => {
+    e.preventDefault();
+    if (!newSubtaskTitle.trim()) return;
+
+    const newSubtask = {
+      title: newSubtaskTitle.trim(),
+      completed: false,
+      dueDate: newSubtaskDueDate ? new Date(newSubtaskDueDate).toISOString() : null
+    };
+
+    const updatedSubtasks = [...(task.subtasks || []).map(s => s.toObject ? s.toObject() : s), newSubtask];
+    await updateTask(task._id, { subtasks: updatedSubtasks });
+    setNewSubtaskTitle('');
+    setNewSubtaskDueDate('');
+  };
 
   return (
     <div className={`task-card ${task.completed ? 'task-completed' : ''} ${overdue ? 'task-overdue' : ''}`}>
       <button
-        className={`task-card-select-btn ${isSelected ? 'selected' : ''}`}
-        onClick={onSelect}
-        aria-label={isSelected ? 'Deselect task' : 'Select task'}
-        role="checkbox"
-        aria-checked={isSelected}
-      />
+        className={`task-expand-btn ${isExpanded ? 'expanded' : ''}`}
+        onClick={() => setIsExpanded(prev => !prev)}
+        aria-label={isExpanded ? 'Collapse steps' : 'Expand steps'}
+      >
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path d="M3 2l4 3-4 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
 
-      <button
-        className={`checkbox ${task.completed ? 'checked' : ''}`}
-        onClick={() => onToggle(task._id, task.completed)}
-        aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
-      />
+      {isSelectionMode ? (
+        <button
+          className={`task-card-select-btn ${isSelected ? 'selected' : ''}`}
+          onClick={onSelect}
+          aria-label={isSelected ? 'Deselect task' : 'Select task'}
+          role="checkbox"
+          aria-checked={isSelected}
+        />
+      ) : (
+        <button
+          className={`checkbox ${task.completed ? 'checked' : ''}`}
+          onClick={handleToggleParent}
+          aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
+        />
+      )}
 
       <div className="task-card-body">
         <div className="task-card-top">
@@ -44,7 +120,23 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete, isSelected,
           <p className="task-card-desc">{task.description}</p>
         )}
 
+        {/* Progress Bar */}
         {task.subtasks && task.subtasks.length > 0 && (
+          <div className="task-progress-container">
+            <div className="task-progress-bar-wrapper">
+              <div 
+                className="task-progress-bar-fill" 
+                style={{ width: `${task.progress || 0}%` }}
+              />
+            </div>
+            <span className="task-progress-text">
+              {task.progress || 0}% Complete ({task.subtasks.filter(s => s.completed).length}/{task.subtasks.length})
+            </span>
+          </div>
+        )}
+
+        {/* Collapsed steps summary */}
+        {task.subtasks && task.subtasks.length > 0 && !isExpanded && (
           <div className="task-card-subtasks-summary" style={{ 
             fontSize: 'var(--text-xs)', 
             color: 'var(--color-text-tertiary)', 
@@ -55,8 +147,69 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete, isSelected,
           }}>
             <span>📋</span>
             <span>
-              {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} subtasks
+              {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} steps complete
             </span>
+          </div>
+        )}
+
+        {/* Expanded subtask list */}
+        {isExpanded && (
+          <div className="task-subtasks-section animate-fade-in">
+            {task.subtasks && task.subtasks.length > 0 && (
+              <div className="task-subtasks-list">
+                {task.subtasks.map((subtask, idx) => {
+                  const subOverdue = !subtask.completed && isOverdue(subtask.dueDate);
+                  return (
+                    <div key={subtask._id || idx} className="task-subsubtask-item">
+                      <button
+                        type="button"
+                        className={`checkbox checkbox-sm ${subtask.completed ? 'checked' : ''}`}
+                        onClick={() => handleToggleSubtask(idx)}
+                        aria-label={subtask.completed ? 'Mark step incomplete' : 'Mark step complete'}
+                      />
+                      <span className={`task-subtask-title ${subtask.completed ? 'completed' : ''}`}>
+                        {subtask.title}
+                      </span>
+                      {subtask.dueDate && (
+                        <span className={`task-subtask-due ${subOverdue ? 'overdue' : ''}`}>
+                          {getDueDateLabel(subtask.dueDate)}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        className="subtask-item-delete-btn"
+                        onClick={() => handleDeleteSubtask(idx)}
+                        aria-label="Delete step"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <form onSubmit={handleAddSubtask} className="task-subtask-add-form">
+              <input
+                type="text"
+                className="form-input form-input-sm subtask-input"
+                placeholder="Add a step..."
+                value={newSubtaskTitle}
+                onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                required
+              />
+              <input
+                type="date"
+                className="form-input form-input-sm subtask-date-input"
+                value={newSubtaskDueDate}
+                onChange={(e) => setNewSubtaskDueDate(e.target.value)}
+                min={getTodayDateString()}
+                aria-label="Step due date"
+              />
+              <button type="submit" className="btn btn-secondary btn-sm">
+                Add
+              </button>
+            </form>
           </div>
         )}
 

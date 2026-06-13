@@ -10,6 +10,10 @@ const subtaskSchema = new mongoose.Schema({
   completed: {
     type: Boolean,
     default: false
+  },
+  dueDate: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
@@ -69,7 +73,16 @@ const taskSchema = new mongoose.Schema({
     index: true
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual property for progress calculation
+taskSchema.virtual('progress').get(function() {
+  if (!this.subtasks || this.subtasks.length === 0) return 0;
+  const completed = this.subtasks.filter(s => s.completed).length;
+  return Math.round((completed / this.subtasks.length) * 100);
 });
 
 // Compound index for efficient querying

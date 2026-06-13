@@ -4,7 +4,14 @@ import { authService } from '../services/authService';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('etf_user');
+    try {
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
 
   // Load user from localStorage on mount and validate token
@@ -44,7 +51,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('etf_token', data.token);
     localStorage.setItem('etf_user', JSON.stringify(data.user));
     setUser(data.user);
-    return data; // includes isNewUser flag
+    return data; 
   }, []);
 
   const signup = useCallback(async (name, email, password) => {
