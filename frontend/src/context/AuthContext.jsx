@@ -62,6 +62,13 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
+  const updatePreferences = useCallback(async (preferences) => {
+    const data = await authService.updatePreferences(preferences);
+    localStorage.setItem('etf_user', JSON.stringify(data.user));
+    setUser(data.user);
+    return data;
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem('etf_token');
     localStorage.removeItem('etf_user');
@@ -76,6 +83,7 @@ export function AuthProvider({ children }) {
     googleLogin,
     signup,
     completeProfileSetup,
+    updatePreferences,
     logout
   };
 

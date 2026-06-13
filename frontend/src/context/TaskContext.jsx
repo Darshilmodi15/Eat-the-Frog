@@ -1,10 +1,19 @@
-import { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { taskService } from '../services/taskService';
 import { isOverdue } from '../utils/dateUtils';
+import { useAuth } from './AuthContext';
 
 const TaskContext = createContext(null);
 
 export function TaskProvider({ children }) {
+  const { user, isAuthenticated, updatePreferences } = useAuth() || {};
+  
+  const [workspace, setWorkspace] = useState(() => {
+    if (user?.lastWorkspace) return user.lastWorkspace;
+    const saved = localStorage.getItem('etf_workspace');
+    return saved || 'personal';
+  });
+  
   const [tasks, setTasks] = useState([]);         // Filtered + sorted tasks for display
   const [allTasks, setAllTasks] = useState([]);    // Unfiltered tasks for stats computation
   const [loading, setLoading] = useState(false);
@@ -16,20 +25,45 @@ export function TaskProvider({ children }) {
   const [sortBy, setSortBy] = useState('createdAt');  // 'createdAt' | 'dueDate' | 'priority'
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Track current filter/sort/search for use in CRUD callbacks
+  // Keep workspace state in sync if user changes (e.g. login or updates)
+  useEffect(() => {
+    if (user?.lastWorkspace) {
+      setWorkspace(user.lastWorkspace);
+    }
+  }, [user]);
+
+  // Track current filter/sort/search/workspace for use in CRUD callbacks
   const filterRef = useRef(filter);
   const sortByRef = useRef(sortBy);
   const searchQueryRef = useRef(searchQuery);
+  const workspaceRef = useRef(workspace);
+  
   filterRef.current = filter;
   sortByRef.current = sortBy;
   searchQueryRef.current = searchQuery;
+  workspaceRef.current = workspace;
 
   const handleSetFilter = useCallback((newFilter) => {
     setFilter(newFilter);
     localStorage.setItem('etf_filter', newFilter);
   }, []);
 
-  // Fetch filtered tasks for display (respects current filter/sort/search)
+  const handleSetWorkspace = useCallback(async (newWorkspace) => {
+    if (!['personal', 'organization'].includes(newWorkspace)) return;
+    
+    setWorkspace(newWorkspace);
+    localStorage.setItem('etf_workspace', newWorkspace);
+    
+    if (isAuthenticated && updatePreferences) {
+      try {
+        await updatePreferences({ lastWorkspace: newWorkspace });
+      } catch (err) {
+        console.error('[TASKS] Failed to persist workspace choice:', err);
+      }
+    }
+  }, [isAuthenticated, updatePreferences]);
+
+  // Fetch filtered tasks for display (respects current filter/sort/search/workspace)
   const fetchTasks = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -38,6 +72,7 @@ export function TaskProvider({ children }) {
       if (filterRef.current !== 'all') params.status = filterRef.current;
       if (sortByRef.current) params.sort = sortByRef.current;
       if (searchQueryRef.current) params.search = searchQueryRef.current;
+      params.workspace = workspaceRef.current;
 
       const data = await taskService.getTasks(params);
       setTasks(data.tasks);
@@ -48,10 +83,10 @@ export function TaskProvider({ children }) {
     }
   }, []);
 
-  // Fetch ALL tasks (unfiltered) for accurate stats computation
+  // Fetch ALL tasks (unfiltered by workspace) for accurate stats computation across both workspaces
   const fetchAllStats = useCallback(async () => {
     try {
-      const data = await taskService.getTasks({});
+      const data = await taskService.getTasks({ workspace: 'all' });
       setAllTasks(data.tasks);
     } catch (err) {
       // Stats fetch failure is non-critical; don't overwrite main error
@@ -70,7 +105,10 @@ export function TaskProvider({ children }) {
   }, [fetchTasks, fetchAllStats]);
 
   const createTask = useCallback(async (taskData) => {
-    const data = await taskService.createTask(taskData);
+    const data = await taskService.createTask({
+      ...taskData,
+      workspace: workspaceRef.current
+    });
     // Re-fetch from server to get correct sort position and updated stats
     await refreshAfterMutation();
     return data.task;
@@ -102,16 +140,30 @@ export function TaskProvider({ children }) {
     await refreshAfterMutation();
   }, [refreshAfterMutation]);
 
-  // Stats computed from allTasks (full unfiltered dataset) — always accurate
-  // Uses the same isOverdue utility as TaskCard for consistency (Bug 4 fix)
-  const stats = {
-    total: allTasks.length,
-    pending: allTasks.filter(t => !t.completed).length,
-    completed: allTasks.filter(t => t.completed).length,
-    overdue: allTasks.filter(t => !t.completed && isOverdue(t.dueDate)).length
+  // Scoped stats calculation for each workspace
+  const personalTasks = allTasks.filter(t => t.workspace === 'personal');
+  const organizationTasks = allTasks.filter(t => t.workspace === 'organization');
+
+  const personalStats = {
+    total: personalTasks.length,
+    pending: personalTasks.filter(t => !t.completed).length,
+    completed: personalTasks.filter(t => t.completed).length,
+    overdue: personalTasks.filter(t => !t.completed && isOverdue(t.dueDate)).length
   };
 
+  const organizationStats = {
+    total: organizationTasks.length,
+    pending: organizationTasks.filter(t => !t.completed).length,
+    completed: organizationTasks.filter(t => t.completed).length,
+    overdue: organizationTasks.filter(t => !t.completed && isOverdue(t.dueDate)).length
+  };
+
+  // Expose the stats block belonging to the active workspace
+  const stats = workspace === 'organization' ? organizationStats : personalStats;
+
   const value = {
+    workspace,
+    setWorkspace: handleSetWorkspace,
     tasks,
     loading,
     error,

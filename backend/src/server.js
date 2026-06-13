@@ -9,9 +9,28 @@ const errorHandler = require('./middleware/errorHandler');
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const { initEmailService } = require('./services/emailService');
+const Task = require('./models/Task');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Run database migration for legacy tasks
+const runMigration = async () => {
+  try {
+    console.log('[MIGRATION] Checking for tasks without a workspace...');
+    const result = await Task.updateMany(
+      { workspace: { $exists: false } },
+      { $set: { workspace: 'personal' } }
+    );
+    if (result.modifiedCount > 0) {
+      console.log(`[MIGRATION] Migrated ${result.modifiedCount} legacy tasks to "personal" workspace.`);
+    } else {
+      console.log('[MIGRATION] No legacy tasks needed migration.');
+    }
+  } catch (err) {
+    console.error('[MIGRATION] Error running workspace migration:', err.message);
+  }
+};
 
 // Middleware
 app.use(cors({
@@ -46,6 +65,8 @@ app.use(errorHandler);
 // Start server
 const start = async () => {
   await connectDB();
+  
+  await runMigration();
   
   // Initialize email notification service
   initEmailService();

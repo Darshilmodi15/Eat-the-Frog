@@ -44,6 +44,20 @@ const userSchema = new mongoose.Schema({
   profileCompleted: {
     type: Boolean,
     default: true
+  },
+  theme: {
+    type: String,
+    enum: ['light', 'dark', 'system'],
+    default: 'system'
+  },
+  lastWorkspace: {
+    type: String,
+    enum: ['personal', 'organization'],
+    default: 'personal'
+  },
+  avatar: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true

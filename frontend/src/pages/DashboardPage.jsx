@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { fetchTasks, filter, sortBy, searchQuery, deleteTask, deleteMultipleTasks } = useTasks();
+  const { fetchTasks, filter, sortBy, searchQuery, deleteTask, deleteMultipleTasks, workspace } = useTasks();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [toasts, setToasts] = useState([]);
@@ -27,10 +27,10 @@ export default function DashboardPage() {
     setSelectedTaskIds([]);
   }, [filter]);
 
-  // Re-fetch on mount and whenever filter/sort/search changes
+  // Re-fetch on mount and whenever filter/sort/search/workspace changes
   useEffect(() => {
     fetchTasks();
-  }, [fetchTasks, filter, sortBy, searchQuery]);
+  }, [fetchTasks, filter, sortBy, searchQuery, workspace]);
 
   const addToast = useCallback((message, type = 'success') => {
     const id = Date.now();

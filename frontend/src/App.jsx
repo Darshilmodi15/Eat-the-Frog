@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { TaskProvider } from './context/TaskContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import GuestRoute from './components/common/GuestRoute';
@@ -17,8 +18,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <TaskProvider>
-          <Routes>
+        <ThemeProvider>
+          <TaskProvider>
+            <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={
               <GuestRoute>
@@ -42,7 +44,8 @@ export default function App() {
             } />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
-        </TaskProvider>
+          </TaskProvider>
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
   );

@@ -61,6 +61,12 @@ const taskSchema = new mongoose.Schema({
   lastNotified: {
     type: Date,
     default: null
+  },
+  workspace: {
+    type: String,
+    enum: ['personal', 'organization'],
+    default: 'personal',
+    index: true
   }
 }, {
   timestamps: true
@@ -69,5 +75,6 @@ const taskSchema = new mongoose.Schema({
 // Compound index for efficient querying
 taskSchema.index({ userId: 1, completed: 1 });
 taskSchema.index({ userId: 1, dueDate: 1 });
+taskSchema.index({ userId: 1, workspace: 1 });
 
 module.exports = mongoose.model('Task', taskSchema);

@@ -215,7 +215,8 @@ const profileSetup = async (req, res, next) => {
       {
         workspaceType,
         phoneNumber: phoneNumber || null,
-        profileCompleted: true
+        profileCompleted: true,
+        lastWorkspace: workspaceType
       },
       { returnDocument: 'after', runValidators: true }
     ).select('-passwordHash');
@@ -236,12 +237,78 @@ const profileSetup = async (req, res, next) => {
   }
 };
 
+// PUT /api/auth/preferences
+const updatePreferences = async (req, res, next) => {
+  try {
+    const { theme, lastWorkspace, name, phoneNumber, avatar } = req.body;
+    const updates = {};
+
+    if (theme !== undefined) {
+      if (!['light', 'dark', 'system'].includes(theme)) {
+        return res.status(400).json({ message: 'Invalid theme value.' });
+      }
+      updates.theme = theme;
+    }
+
+    if (lastWorkspace !== undefined) {
+      if (!['personal', 'organization'].includes(lastWorkspace)) {
+        return res.status(400).json({ message: 'Invalid workspace value.' });
+      }
+      updates.lastWorkspace = lastWorkspace;
+    }
+
+    if (name !== undefined) {
+      const trimmedName = name.trim();
+      if (!trimmedName) {
+        return res.status(400).json({ message: 'Name cannot be empty.' });
+      }
+      if (trimmedName.length > 60) {
+        return res.status(400).json({ message: 'Name cannot exceed 60 characters.' });
+      }
+      updates.name = trimmedName;
+    }
+
+    if (phoneNumber !== undefined) {
+      updates.phoneNumber = phoneNumber || null;
+    }
+
+    if (avatar !== undefined) {
+      updates.avatar = avatar || null;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: 'No valid preference fields to update.' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updates },
+      { returnDocument: 'after', runValidators: true }
+    ).select('-passwordHash');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    console.log('[AUTH] Preferences updated for user:', { id: user._id, updates });
+
+    res.json({
+      message: 'Preferences updated successfully.',
+      user: user.toJSON()
+    });
+  } catch (error) {
+    console.error('[AUTH] Preferences update error:', error.message);
+    next(error);
+  }
+};
+
 module.exports = {
   signup,
   login,
   getMe,
   googleLogin,
   profileSetup,
+  updatePreferences,
   signupValidation,
   loginValidation
 };

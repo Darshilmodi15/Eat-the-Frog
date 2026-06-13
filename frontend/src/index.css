@@ -95,6 +95,44 @@
   --max-width: 1200px;
 }
 
+[data-theme="dark"] {
+  /* Colors — Luxury Warm Dark Theme */
+  --color-bg: #141414;
+  --color-bg-alt: #1A1A1A;
+  --color-surface: #1E1E1E;
+  --color-surface-hover: #262626;
+  --color-border: #2C2C2C;
+  --color-border-light: #222222;
+
+  --color-text-primary: #F3F3F3;
+  --color-text-secondary: #A0A0A0;
+  --color-text-tertiary: #555555;
+  --color-text-inverse: #141414;
+
+  --color-accent: #C49A3A;
+  --color-accent-hover: #A37E2E;
+  --color-accent-light: rgba(196, 154, 58, 0.1);
+
+  --color-success: #43A047;
+  --color-success-light: rgba(67, 160, 71, 0.1);
+  --color-warning: #FFB300;
+  --color-warning-light: rgba(255, 179, 0, 0.1);
+  --color-danger: #E53935;
+  --color-danger-light: rgba(229, 57, 53, 0.1);
+
+  /* Priority colors */
+  --color-priority-high: #E53935;
+  --color-priority-medium: #FFB300;
+  --color-priority-low: #43A047;
+
+  /* Shadows — soft shadows for dark mode */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4), 0 8px 10px rgba(0, 0, 0, 0.3);
+}
+
 /* ── CSS Reset ── */
 *, *::before, *::after {
   margin: 0;
@@ -115,6 +153,11 @@ body {
   background-color: var(--color-bg);
   line-height: var(--leading-normal);
   min-height: 100vh;
+}
+
+/* Smooth Transitions for Theme Switching */
+body, .sidebar, .card, .task-card, .btn, .form-input, .form-select, .modal, .bulk-action-bar, .settings-modal-card, .theme-option-card, .workspace-dropdown, .workspace-switcher-btn {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 #root {

@@ -24,5 +24,10 @@ export const authService = {
   profileSetup: async (workspaceType, phoneNumber) => {
     const { data } = await api.put('/auth/profile-setup', { workspaceType, phoneNumber });
     return data;
+  },
+
+  updatePreferences: async (preferences) => {
+    const { data } = await api.put('/auth/preferences', preferences);
+    return data;
   }
 };

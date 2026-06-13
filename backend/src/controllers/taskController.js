@@ -47,8 +47,14 @@ const taskUpdateValidation = [
 // GET /api/tasks
 const getTasks = async (req, res, next) => {
   try {
-    const { status, sort, search } = req.query;
+    const { status, sort, search, workspace } = req.query;
     const filter = { userId: req.user._id };
+
+    // Workspace filter
+    const targetWorkspace = workspace || req.user.lastWorkspace || 'personal';
+    if (targetWorkspace !== 'all') {
+      filter.workspace = targetWorkspace;
+    }
 
     // Status filter
     if (status === 'pending') filter.completed = false;
@@ -111,10 +117,16 @@ const createTask = async (req, res, next) => {
       return res.status(400).json({ message: errors.array()[0].msg });
     }
 
-    const { title, description, priority, dueDate } = req.body;
+    const { title, description, priority, dueDate, workspace } = req.body;
 
-    // Get the highest order number for this user's tasks
-    const lastTask = await Task.findOne({ userId: req.user._id }).sort({ order: -1 });
+    if (workspace && !['personal', 'organization'].includes(workspace)) {
+      return res.status(400).json({ message: 'Workspace must be personal or organization' });
+    }
+
+    const targetWorkspace = workspace || req.user.lastWorkspace || 'personal';
+
+    // Get the highest order number for this user's tasks in this workspace
+    const lastTask = await Task.findOne({ userId: req.user._id, workspace: targetWorkspace }).sort({ order: -1 });
     const order = lastTask ? lastTask.order + 1 : 0;
 
     const task = await Task.create({
@@ -123,7 +135,8 @@ const createTask = async (req, res, next) => {
       description: description || '',
       priority: priority || 'medium',
       dueDate,
-      order
+      order,
+      workspace: targetWorkspace
     });
 
     res.status(201).json({ message: 'Task created.', task });
