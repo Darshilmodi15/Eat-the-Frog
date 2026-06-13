@@ -116,10 +116,23 @@ const updateTask = async (req, res, next) => {
       return res.status(400).json({ message: errors.array()[0].msg });
     }
 
+    // Whitelist allowed fields — prevents userId, _id, order, etc. injection
+    const allowedFields = ['title', 'description', 'priority', 'dueDate', 'completed'];
+    const updates = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: 'No valid fields to update.' });
+    }
+
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, userId: req.user._id },
-      { $set: req.body },
-      { new: true, returnDocument: 'after', runValidators: true }
+      { $set: updates },
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!task) {

@@ -1,24 +1,35 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { taskService } from '../services/taskService';
+import { isOverdue } from '../utils/dateUtils';
 
 const TaskContext = createContext(null);
 
 export function TaskProvider({ children }) {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([]);         // Filtered + sorted tasks for display
+  const [allTasks, setAllTasks] = useState([]);    // Unfiltered tasks for stats computation
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');       // 'all' | 'pending' | 'completed'
   const [sortBy, setSortBy] = useState('createdAt');  // 'createdAt' | 'dueDate' | 'priority'
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Track current filter/sort/search for use in CRUD callbacks
+  const filterRef = useRef(filter);
+  const sortByRef = useRef(sortBy);
+  const searchQueryRef = useRef(searchQuery);
+  filterRef.current = filter;
+  sortByRef.current = sortBy;
+  searchQueryRef.current = searchQuery;
+
+  // Fetch filtered tasks for display (respects current filter/sort/search)
   const fetchTasks = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const params = {};
-      if (filter !== 'all') params.status = filter;
-      if (sortBy) params.sort = sortBy;
-      if (searchQuery) params.search = searchQuery;
+      if (filterRef.current !== 'all') params.status = filterRef.current;
+      if (sortByRef.current) params.sort = sortByRef.current;
+      if (searchQueryRef.current) params.search = searchQueryRef.current;
 
       const data = await taskService.getTasks(params);
       setTasks(data.tasks);
@@ -27,40 +38,63 @@ export function TaskProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, [filter, sortBy, searchQuery]);
+  }, []);
+
+  // Fetch ALL tasks (unfiltered) for accurate stats computation
+  const fetchAllStats = useCallback(async () => {
+    try {
+      const data = await taskService.getTasks({});
+      setAllTasks(data.tasks);
+    } catch (err) {
+      // Stats fetch failure is non-critical; don't overwrite main error
+      console.error('[TASKS] Stats fetch failed:', err);
+    }
+  }, []);
+
+  // Combined fetch: display tasks + stats (called on mount and after filter/sort changes)
+  const fetchAll = useCallback(async () => {
+    await Promise.all([fetchTasks(), fetchAllStats()]);
+  }, [fetchTasks, fetchAllStats]);
+
+  // After any CRUD mutation, re-fetch both filtered tasks and full stats from server
+  const refreshAfterMutation = useCallback(async () => {
+    await Promise.all([fetchTasks(), fetchAllStats()]);
+  }, [fetchTasks, fetchAllStats]);
 
   const createTask = useCallback(async (taskData) => {
     const data = await taskService.createTask(taskData);
-    setTasks(prev => [data.task, ...prev]);
+    // Re-fetch from server to get correct sort position and updated stats
+    await refreshAfterMutation();
     return data.task;
-  }, []);
+  }, [refreshAfterMutation]);
 
   const updateTask = useCallback(async (id, taskData) => {
     const data = await taskService.updateTask(id, taskData);
-    setTasks(prev => prev.map(t => t._id === id ? data.task : t));
+    // Re-fetch from server to respect filters/sorts and update stats
+    await refreshAfterMutation();
     return data.task;
-  }, []);
+  }, [refreshAfterMutation]);
 
   const toggleComplete = useCallback(async (id, completed) => {
     const data = await taskService.updateTask(id, { completed: !completed });
-    setTasks(prev => prev.map(t => t._id === id ? data.task : t));
+    // Re-fetch: task may need to appear/disappear from filtered view, stats must update
+    await refreshAfterMutation();
     return data.task;
-  }, []);
+  }, [refreshAfterMutation]);
 
   const deleteTask = useCallback(async (id) => {
     await taskService.deleteTask(id);
-    setTasks(prev => prev.filter(t => t._id !== id));
-  }, []);
+    // Re-fetch from server to update both display and stats
+    await refreshAfterMutation();
+  }, [refreshAfterMutation]);
 
-  // Computed stats
+  // Stats computed from allTasks (full unfiltered dataset) — always accurate
+  // Uses the same isOverdue utility as TaskCard for consistency (Bug 4 fix)
   const stats = {
-    total: tasks.length,
-    pending: tasks.filter(t => !t.completed).length,
-    completed: tasks.filter(t => t.completed).length,
-    overdue: tasks.filter(t => {
-      if (t.completed) return false;
-      return new Date(t.dueDate) < new Date();
-    }).length
+    total: allTasks.length,
+    pending: allTasks.filter(t => !t.completed).length,
+    completed: allTasks.filter(t => t.completed).length,
+    overdue: allTasks.filter(t => !t.completed && isOverdue(t.dueDate)).length
   };
 
   const value = {
@@ -74,7 +108,7 @@ export function TaskProvider({ children }) {
     setFilter,
     setSortBy,
     setSearchQuery,
-    fetchTasks,
+    fetchTasks: fetchAll,  // DashboardPage calls this; it fetches both
     createTask,
     updateTask,
     toggleComplete,

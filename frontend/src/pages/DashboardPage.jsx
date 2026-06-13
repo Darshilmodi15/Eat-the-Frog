@@ -16,6 +16,7 @@ export default function DashboardPage() {
   const [editingTask, setEditingTask] = useState(null);
   const [toasts, setToasts] = useState([]);
 
+  // Re-fetch on mount and whenever filter/sort/search changes
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks, filter, sortBy, searchQuery]);
