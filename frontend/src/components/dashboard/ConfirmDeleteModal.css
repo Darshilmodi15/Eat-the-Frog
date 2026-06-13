@@ -1,0 +1,13 @@
+.modal-body p {
+  line-height: var(--leading-relaxed);
+}
+
+.modal-actions .btn-danger {
+  background: var(--color-danger);
+  color: white;
+}
+
+.modal-actions .btn-danger:hover {
+  background: #962c2c;
+  color: white;
+}

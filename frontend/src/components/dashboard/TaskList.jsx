@@ -3,8 +3,8 @@ import EmptyState from '../common/EmptyState';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { useTasks } from '../../context/TaskContext';
 
-export default function TaskList({ onEdit, onShowAddForm }) {
-  const { tasks, loading, error, toggleComplete, deleteTask, filter, searchQuery } = useTasks();
+export default function TaskList({ onEdit, onDelete, onShowAddForm, selectedTaskIds, onSelectTask }) {
+  const { tasks, loading, error, toggleComplete, filter, searchQuery } = useTasks();
 
   if (loading) {
     return <LoadingSpinner text="Loading tasks..." />;
@@ -66,7 +66,9 @@ export default function TaskList({ onEdit, onShowAddForm }) {
           task={task}
           onToggle={toggleComplete}
           onEdit={onEdit}
-          onDelete={deleteTask}
+          onDelete={onDelete}
+          isSelected={selectedTaskIds?.includes(task._id)}
+          onSelect={() => onSelectTask(task._id)}
         />
       ))}
     </div>

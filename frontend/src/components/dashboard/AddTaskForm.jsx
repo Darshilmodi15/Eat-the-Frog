@@ -8,10 +8,19 @@ export default function AddTaskForm({ onClose, onSuccess }) {
     title: '',
     description: '',
     priority: 'medium',
-    dueDate: ''
+    dueDate: '',
+    dueTime: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const getTodayDateString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   const handleChange = (e) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -31,7 +40,21 @@ export default function AddTaskForm({ onClose, onSuccess }) {
 
     setLoading(true);
     try {
-      await createTask(form);
+      // Construct local date-time
+      let localDueDate;
+      if (form.dueTime) {
+        localDueDate = new Date(`${form.dueDate}T${form.dueTime}`);
+      } else {
+        localDueDate = new Date(`${form.dueDate}T23:59:59.999`);
+      }
+
+      await createTask({
+        title: form.title,
+        description: form.description,
+        priority: form.priority,
+        dueDate: localDueDate.toISOString()
+      });
+      
       onSuccess?.('Task created successfully.');
       onClose();
     } catch (err) {
@@ -46,7 +69,7 @@ export default function AddTaskForm({ onClose, onSuccess }) {
       <form className="add-task-form" onSubmit={handleSubmit}>
         <div className="add-task-form-header">
           <h3 className="add-task-form-title">New Task</h3>
-          <button type="button" className="btn btn-ghost btn-icon" onClick={onClose}>
+          <button type="button" className="btn btn-ghost btn-icon" onClick={onClose} aria-label="Close form">
             ✕
           </button>
         </div>
@@ -106,7 +129,20 @@ export default function AddTaskForm({ onClose, onSuccess }) {
               className="form-input"
               value={form.dueDate}
               onChange={handleChange}
+              min={getTodayDateString()}
               required
+            />
+          </div>
+
+          <div className="form-group" style={{flex: 1}}>
+            <label className="form-label" htmlFor="add-time">Due Time</label>
+            <input
+              id="add-time"
+              type="time"
+              name="dueTime"
+              className="form-input"
+              value={form.dueTime}
+              onChange={handleChange}
             />
           </div>
         </div>

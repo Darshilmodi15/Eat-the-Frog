@@ -350,8 +350,8 @@ input, textarea, select {
   border-color: var(--color-accent);
 }
 .checkbox.checked {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  background: var(--color-success);
+  border-color: var(--color-success);
 }
 .checkbox.checked::after {
   content: '';
@@ -441,4 +441,50 @@ input, textarea, select {
     --text-5xl: 2rem;
     --text-6xl: 2.25rem;
   }
+}
+
+/* Bulk Action Bar */
+.bulk-action-bar {
+  position: fixed;
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: var(--space-3) var(--space-6);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  z-index: 500;
+  transition: transform var(--transition-spring), opacity var(--transition-base);
+  opacity: 0;
+  pointer-events: none;
+}
+.bulk-action-bar.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.bulk-action-text {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.bulk-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.bulk-action-btn-danger {
+  background: var(--color-danger);
+  color: white;
+}
+.bulk-action-btn-danger:hover {
+  background: #962c2c;
+  color: white;
 }

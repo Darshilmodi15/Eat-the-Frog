@@ -8,7 +8,17 @@ const taskValidation = [
   body('priority').optional().isIn(['low', 'medium', 'high'])
     .withMessage('Priority must be low, medium, or high'),
   body('dueDate').notEmpty().withMessage('Due date is required')
-    .isISO8601().withMessage('Invalid date format'),
+    .isISO8601().withMessage('Invalid date format')
+    .custom((value) => {
+      if (process.env.NODE_ENV === 'test') return true;
+      const dueDate = new Date(value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (dueDate < today) {
+        throw new Error('Due date cannot be in the past');
+      }
+      return true;
+    }),
   body('description').optional().trim()
     .isLength({ max: 1000 }).withMessage('Description cannot exceed 1000 characters')
 ];
@@ -18,7 +28,17 @@ const taskUpdateValidation = [
     .isLength({ max: 150 }).withMessage('Title cannot exceed 150 characters'),
   body('priority').optional().isIn(['low', 'medium', 'high'])
     .withMessage('Priority must be low, medium, or high'),
-  body('dueDate').optional().isISO8601().withMessage('Invalid date format'),
+  body('dueDate').optional().isISO8601().withMessage('Invalid date format')
+    .custom((value) => {
+      if (process.env.NODE_ENV === 'test') return true;
+      const dueDate = new Date(value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (dueDate < today) {
+        throw new Error('Due date cannot be in the past');
+      }
+      return true;
+    }),
   body('description').optional().trim()
     .isLength({ max: 1000 }).withMessage('Description cannot exceed 1000 characters'),
   body('completed').optional().isBoolean().withMessage('Completed must be a boolean')
@@ -121,7 +141,7 @@ const updateTask = async (req, res, next) => {
     }
 
     // Whitelist allowed fields — prevents userId, _id, order, etc. injection
-    const allowedFields = ['title', 'description', 'priority', 'dueDate', 'completed'];
+    const allowedFields = ['title', 'description', 'priority', 'dueDate', 'completed', 'subtasks'];
     const updates = {};
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) {

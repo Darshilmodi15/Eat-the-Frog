@@ -96,6 +96,12 @@ export function TaskProvider({ children }) {
     await refreshAfterMutation();
   }, [refreshAfterMutation]);
 
+  const deleteMultipleTasks = useCallback(async (ids) => {
+    await Promise.all(ids.map(id => taskService.deleteTask(id)));
+    // Re-fetch from server to update both display and stats
+    await refreshAfterMutation();
+  }, [refreshAfterMutation]);
+
   // Stats computed from allTasks (full unfiltered dataset) — always accurate
   // Uses the same isOverdue utility as TaskCard for consistency (Bug 4 fix)
   const stats = {
@@ -120,7 +126,8 @@ export function TaskProvider({ children }) {
     createTask,
     updateTask,
     toggleComplete,
-    deleteTask
+    deleteTask,
+    deleteMultipleTasks
   };
 
   return (

@@ -117,11 +117,8 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   box-shadow: var(--shadow-xl);
-  transform: perspective(1000px) rotateY(-3deg) rotateX(2deg);
-  transition: transform var(--transition-slow);
-}
-.hero-dashboard-preview:hover {
-  transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+  will-change: transform;
 }
 
 .preview-header {
@@ -197,6 +194,9 @@
   border: 1px solid var(--color-border-light);
   transition: background var(--transition-fast);
 }
+.preview-task:hover {
+  background: var(--color-bg-alt);
+}
 
 .preview-task-check {
   width: 16px;
@@ -204,6 +204,19 @@
   border: 2px solid var(--color-border);
   border-radius: 3px;
   flex-shrink: 0;
+  cursor: pointer;
+  background: transparent;
+  transition: transform var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+.preview-task-check:hover {
+  border-color: var(--color-accent);
+}
+.preview-task-check:active {
+  transform: scale(0.9);
+}
+.preview-task-check:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 .preview-task-check.checked {
   background: var(--color-accent);

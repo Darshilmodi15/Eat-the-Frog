@@ -15,7 +15,8 @@
 }
 
 .task-completed {
-  opacity: 0.65;
+  border-left: 3px solid var(--color-success);
+  opacity: 0.85;
 }
 
 .task-overdue {
@@ -110,4 +111,33 @@
   .task-card-actions {
     opacity: 1;
   }
+}
+
+.task-card-select-btn {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  margin-top: 2px;
+}
+.task-card-select-btn:hover {
+  border-color: var(--color-accent);
+  background: var(--color-bg);
+}
+.task-card-select-btn.selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.task-card-select-btn.selected::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
 }
