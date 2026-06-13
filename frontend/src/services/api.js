@@ -2,6 +2,15 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
+export const getAvatarUrl = (avatarPath) => {
+  if (!avatarPath) return '';
+  if (avatarPath.startsWith('/uploads/')) {
+    const backendOrigin = API_BASE_URL.replace(/\/api$/, '');
+    return `${backendOrigin}${avatarPath}`;
+  }
+  return avatarPath;
+};
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {

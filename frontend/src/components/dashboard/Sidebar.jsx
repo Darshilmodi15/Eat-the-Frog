@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTasks } from '../../context/TaskContext';
 import SettingsModal from './SettingsModal';
 import LogoutModal from './LogoutModal';
+import { getAvatarUrl } from '../../services/api';
 import './Sidebar.css';
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -105,8 +106,8 @@ export default function Sidebar({ isOpen, onClose }) {
 
       <div className="sidebar-user">
         <div className="sidebar-avatar">
-          {user?.avatar && (user.avatar.startsWith('/') || user.avatar.startsWith('http') || user.avatar.startsWith('data:')) ? (
-            <img src={user.avatar} alt="Avatar" className="sidebar-avatar-img" />
+          {user?.avatar && (user.avatar.startsWith('/uploads/') || user.avatar.startsWith('http') || user.avatar.startsWith('data:')) ? (
+            <img src={getAvatarUrl(user.avatar)} alt="Avatar" className="sidebar-avatar-img" />
           ) : (
             user?.avatar || user?.name?.[0]?.toUpperCase() || 'U'
           )}

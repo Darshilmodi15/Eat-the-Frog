@@ -65,14 +65,6 @@
   margin-bottom: var(--space-4);
 }
 
-.google-btn-wrapper > div {
-  width: 100% !important;
-}
-
-.google-btn-wrapper iframe {
-  width: 100% !important;
-}
-
 /* OR Divider */
 .auth-divider {
   display: flex;

@@ -62,6 +62,14 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Routes
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    app: 'Eat The Frog API',
+    status: 'running'
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });

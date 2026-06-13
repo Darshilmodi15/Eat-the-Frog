@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import LogoutModal from './LogoutModal';
+import { getAvatarUrl } from '../../services/api';
 import './SettingsModal.css';
 
 export default function SettingsModal({ onClose }) {
@@ -165,7 +166,7 @@ export default function SettingsModal({ onClose }) {
     }
   };
 
-  const isImageAvatar = avatar && (avatar.startsWith('/') || avatar.startsWith('http') || avatar.startsWith('data:'));
+  const isImageAvatar = avatar && (avatar.startsWith('/uploads/') || avatar.startsWith('http') || avatar.startsWith('data:'));
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -178,7 +179,7 @@ export default function SettingsModal({ onClose }) {
               <div className="settings-avatar-management">
                 <div className="settings-avatar-preview">
                   {isImageAvatar ? (
-                    <img src={avatar} alt="Avatar Preview" className="settings-avatar-preview-img" />
+                    <img src={getAvatarUrl(avatar)} alt="Avatar Preview" className="settings-avatar-preview-img" />
                   ) : (
                     avatar || name[0]?.toUpperCase() || 'U'
                   )}
