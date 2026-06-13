@@ -1,0 +1,10 @@
+{
+  "name": "eat-the-frog-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "yarn --cwd backend install",
+    "build": "yarn --cwd backend build",
+    "start": "yarn --cwd backend start"
+  }
+}
