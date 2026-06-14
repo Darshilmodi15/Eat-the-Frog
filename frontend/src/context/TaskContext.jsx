@@ -22,7 +22,10 @@ export function TaskProvider({ children }) {
     const saved = localStorage.getItem('etf_filter');
     return saved || 'all';
   }); // 'all' | 'pending' | 'completed' | 'overdue'
-  const [sortBy, setSortBy] = useState('createdAt');  // 'createdAt' | 'dueDate' | 'priority'
+  const [sortBy, setSortBy] = useState(() => {
+    const saved = localStorage.getItem('etf_sortBy');
+    return saved || 'order';
+  });
   const [searchQuery, setSearchQuery] = useState('');
 
   const lastUserIdRef = useRef(null);
@@ -60,6 +63,11 @@ export function TaskProvider({ children }) {
   const handleSetFilter = useCallback((newFilter) => {
     setFilter(newFilter);
     localStorage.setItem('etf_filter', newFilter);
+  }, []);
+
+  const handleSetSortBy = useCallback((newSortBy) => {
+    setSortBy(newSortBy);
+    localStorage.setItem('etf_sortBy', newSortBy);
   }, []);
 
   const handleSetWorkspace = useCallback(async (newWorkspace) => {
@@ -154,6 +162,18 @@ export function TaskProvider({ children }) {
     await refreshAfterMutation();
   }, [refreshAfterMutation]);
 
+  const reorderTasks = useCallback(async (newOrderedTasks) => {
+    setTasks(newOrderedTasks);
+    try {
+      const orderedIds = newOrderedTasks.map(t => t._id);
+      await taskService.reorderTasks(orderedIds);
+      await fetchAllStats();
+    } catch (err) {
+      console.error('[TASKS] Failed to persist task order:', err);
+      await fetchTasks();
+    }
+  }, [fetchTasks, fetchAllStats]);
+
   // Scoped stats calculation for each workspace
   const personalTasks = allTasks.filter(t => t.workspace === 'personal');
   const organizationTasks = allTasks.filter(t => t.workspace === 'organization');
@@ -186,14 +206,15 @@ export function TaskProvider({ children }) {
     searchQuery,
     stats,
     setFilter: handleSetFilter,
-    setSortBy,
+    setSortBy: handleSetSortBy,
     setSearchQuery,
     fetchTasks: fetchAll,  // DashboardPage calls this; it fetches both
     createTask,
     updateTask,
     toggleComplete,
     deleteTask,
-    deleteMultipleTasks
+    deleteMultipleTasks,
+    reorderTasks
   };
 
   return (

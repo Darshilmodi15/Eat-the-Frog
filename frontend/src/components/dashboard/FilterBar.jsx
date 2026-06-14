@@ -33,6 +33,7 @@ export default function FilterBar() {
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
         >
+          <option value="order">Custom Order</option>
           <option value="createdAt">Date Created</option>
           <option value="dueDate">Due Date</option>
           <option value="priority">Priority</option>

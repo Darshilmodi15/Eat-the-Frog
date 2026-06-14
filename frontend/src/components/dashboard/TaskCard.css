@@ -296,3 +296,25 @@
   font-size: var(--text-sm);
   border-radius: var(--radius-sm);
 }
+
+/* Drag and Drop styles */
+.task-card[draggable="true"] {
+  cursor: grab;
+}
+.task-card-grip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 20px;
+  color: var(--color-text-tertiary);
+  cursor: grab;
+  margin-top: 2px;
+  flex-shrink: 0;
+  user-select: none;
+  font-size: 16px;
+  line-height: 1;
+}
+.task-card-grip:active {
+  cursor: grabbing;
+}

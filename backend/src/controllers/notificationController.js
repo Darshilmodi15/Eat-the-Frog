@@ -1,8 +1,13 @@
 const Notification = require('../models/Notification');
+const { sendDueTomorrowNotifications, sendOverdueNotifications } = require('../services/emailService');
 
 // GET /api/notifications
 const getNotifications = async (req, res, next) => {
   try {
+    // Check and trigger notifications for this user in real time
+    await sendDueTomorrowNotifications(req.user._id);
+    await sendOverdueNotifications(req.user._id);
+
     const notifications = await Notification.find({ userId: req.user._id })
       .sort({ createdAt: -1 })
       .limit(50);

@@ -1,10 +1,51 @@
+import { useState, useEffect } from 'react';
 import TaskCard from './TaskCard';
 import EmptyState from '../common/EmptyState';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { useTasks } from '../../context/TaskContext';
 
 export default function TaskList({ onEdit, onDelete, onShowAddForm, selectedTaskIds, onSelectTask, isSelectionMode }) {
-  const { tasks, loading, error, toggleComplete, filter, searchQuery } = useTasks();
+  const { tasks, loading, error, toggleComplete, filter, searchQuery, sortBy, reorderTasks } = useTasks();
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const [localTasks, setLocalTasks] = useState(tasks);
+
+  useEffect(() => {
+    setLocalTasks(tasks);
+  }, [tasks]);
+
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index);
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const updated = Array.from(localTasks);
+    const [removed] = updated.splice(draggedIndex, 1);
+    updated.splice(index, 0, removed);
+
+    setLocalTasks(updated);
+    setDraggedIndex(index);
+  };
+
+  const handleDrop = async (e, index) => {
+    e.preventDefault();
+    if (draggedIndex === null) return;
+    await reorderTasks(localTasks);
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setLocalTasks(tasks);
+  };
+
+  const handleDragLeave = () => {
+    // Optional: could revert hover classes
+  };
 
   if (loading) {
     return <LoadingSpinner text="Loading tasks..." />;
@@ -60,7 +101,7 @@ export default function TaskList({ onEdit, onDelete, onShowAddForm, selectedTask
 
   return (
     <div className="task-list stagger-children">
-      {tasks.map(task => (
+      {localTasks.map((task, idx) => (
         <TaskCard
           key={task._id}
           task={task}
@@ -70,6 +111,14 @@ export default function TaskList({ onEdit, onDelete, onShowAddForm, selectedTask
           isSelected={selectedTaskIds?.includes(task._id)}
           onSelect={() => onSelectTask(task._id)}
           isSelectionMode={isSelectionMode}
+          isDraggable={sortBy === 'order' && !isSelectionMode}
+          dragEvents={{
+            onDragStart: (e) => handleDragStart(e, idx),
+            onDragOver: (e) => handleDragOver(e, idx),
+            onDrop: (e) => handleDrop(e, idx),
+            onDragEnd: handleDragEnd,
+            onDragLeave: handleDragLeave
+          }}
         />
       ))}
     </div>

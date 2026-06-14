@@ -49,18 +49,23 @@ const initEmailService = () => {
   console.log('Email/Notification service: Cron job scheduled (daily at 8:00 AM).');
 };
 
-const sendDueTomorrowNotifications = async () => {
+const sendDueTomorrowNotifications = async (targetUserId = null) => {
   try {
     const now = new Date();
     const tomorrowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     const tomorrowEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
 
-    // Find incomplete tasks due tomorrow that haven't been notified yet
-    const tasks = await Task.find({
+    const query = {
       completed: false,
       dueDate: { $gte: tomorrowStart, $lt: tomorrowEnd },
       notifiedDueTomorrow: false
-    });
+    };
+    if (targetUserId) {
+      query.userId = targetUserId;
+    }
+
+    // Find incomplete tasks due tomorrow that haven't been notified yet
+    const tasks = await Task.find(query);
 
     for (const task of tasks) {
       const user = await User.findById(task.userId);
@@ -133,16 +138,21 @@ const sendDueTomorrowNotifications = async () => {
   }
 };
 
-const sendOverdueNotifications = async () => {
+const sendOverdueNotifications = async (targetUserId = null) => {
   try {
     const now = new Date();
 
-    // Find overdue, incomplete tasks that haven't been notified for overdue status
-    const overdueTasks = await Task.find({
+    const query = {
       completed: false,
       dueDate: { $lt: now },
       notifiedOverdue: false
-    });
+    };
+    if (targetUserId) {
+      query.userId = targetUserId;
+    }
+
+    // Find overdue, incomplete tasks that haven't been notified for overdue status
+    const overdueTasks = await Task.find(query);
 
     for (const task of overdueTasks) {
       const user = await User.findById(task.userId);

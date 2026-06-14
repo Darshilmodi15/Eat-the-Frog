@@ -3,7 +3,7 @@ import { isOverdue, getDueDateLabel } from '../../utils/dateUtils';
 import { useTasks } from '../../context/TaskContext';
 import './TaskCard.css';
 
-export default function TaskCard({ task, onToggle, onEdit, onDelete, isSelected, onSelect, isSelectionMode }) {
+export default function TaskCard({ task, onToggle, onEdit, onDelete, isSelected, onSelect, isSelectionMode, isDraggable, dragEvents }) {
   const { updateTask } = useTasks();
   
   const [isExpanded, setIsExpanded] = useState(false);
@@ -70,7 +70,16 @@ export default function TaskCard({ task, onToggle, onEdit, onDelete, isSelected,
   };
 
   return (
-    <div className={`task-card ${task.completed ? 'task-completed' : ''} ${overdue ? 'task-overdue' : ''}`}>
+    <div 
+      className={`task-card ${task.completed ? 'task-completed' : ''} ${overdue ? 'task-overdue' : ''}`}
+      draggable={isDraggable}
+      {...dragEvents}
+    >
+      {isDraggable && (
+        <div className="task-card-grip" title="Drag to reorder">
+          ⋮⋮
+        </div>
+      )}
       <button
         className={`task-expand-btn ${isExpanded ? 'expanded' : ''}`}
         onClick={() => setIsExpanded(prev => !prev)}
