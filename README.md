@@ -494,11 +494,7 @@ Deploy using:
 
 ### Darshil Modi
 
-B.Tech Student • Full Stack Developer • AI Enthusiast
-
-GitHub:
-
-https://github.com/Darshilmodi15
+B.Tech Student • Full Stack Developer
 
 ---
 
