@@ -1,4 +1,4 @@
-# 🐸 Eat The Frog
+
 
 > **Stop managing tasks. Start executing priorities.**
 
